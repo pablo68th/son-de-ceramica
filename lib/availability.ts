@@ -19,7 +19,7 @@ export async function getAvailability(
     }
   }
 
-  const { data: blocked } = await supabase
+const { data: blocked } = await supabase
     .from("blocked_dates")
     .select("*")
     .eq("blocked_date", date)
@@ -60,5 +60,39 @@ export async function getAvailability(
     available: remaining > 0,
     remaining,
     message: remaining > 0 ? "Disponible" : "Sin cupo",
+  }
+}
+
+export async function validateFullAvailability({
+  serviceId,
+  dates,
+  blockId,
+  peopleCount,
+}: {
+  serviceId: string
+  dates: string[]
+  blockId: string
+  peopleCount: number
+}) {
+  const results = []
+
+  for (const date of dates) {
+    const availability = await getAvailability(serviceId, date, blockId)
+
+    const hasEnoughSpace = availability.remaining >= peopleCount
+
+    results.push({
+      date,
+      available: hasEnoughSpace,
+      remaining: availability.remaining,
+      message: availability.message,
+    })
+  }
+
+  const allAvailable = results.every((result) => result.available)
+
+  return {
+    allAvailable,
+    results,
   }
 }

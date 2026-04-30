@@ -1,5 +1,5 @@
 import { supabase } from "../lib/supabaseClient"
-import { getAvailability } from "../lib/availability"
+import { getAvailability, validateFullAvailability } from "../lib/availability";
 import { generateSessionDates } from "../lib/sessionGenerator"
 
 export default async function Home() {
@@ -40,6 +40,16 @@ const testEightSessions = generateSessionDates({
   weeklyFrequency: 2,
 })
 
+const fullAvailabilityTest =
+  firstService && firstBlock
+    ? await validateFullAvailability({
+        serviceId: firstService.id,
+        dates: testFourSessions,
+        blockId: firstBlock.id,
+        peopleCount: 2,
+      })
+    : null
+
   const availability =
     firstService && firstBlock
       ? await getAvailability(firstService.id, "2026-05-20", firstBlock.id)
@@ -72,6 +82,24 @@ const testEightSessions = generateSessionDates({
             <li key={date}>{date}</li>
           ))}
         </ul>
+
+        <section className="mb-8 rounded-xl border p-4">
+          <h2 className="font-bold mb-2">Prueba de disponibilidad completa</h2>
+
+          <p>
+            ¿Todas las sesiones tienen cupo?:{" "}
+            {fullAvailabilityTest?.allAvailable ? "Sí" : "No"}
+          </p>
+
+          <ul className="mt-4">
+            {fullAvailabilityTest?.results.map((result) => (
+              <li key={result.date}>
+                {result.date} — {result.available ? "Disponible" : "Sin cupo"} —{" "}
+                {result.remaining} lugares restantes
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <h3 className="font-semibold">Paquete de 8 sesiones</h3>
         <ul>
