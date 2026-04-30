@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabaseClient"
 import { getAvailability } from "../lib/availability"
+import { generateSessionDates } from "../lib/sessionGenerator"
 
 export default async function Home() {
   const { data: services, error: servicesError } = await supabase
@@ -26,6 +27,19 @@ export default async function Home() {
     (block) => block.day_of_week === 3 && block.label === "Mañana"
   )
 
+const testFourSessions = generateSessionDates({
+  startDate: "2026-05-20",
+  sessionsCount: 4,
+  weeklyFrequency: 1,
+})
+
+const testEightSessions = generateSessionDates({
+  startDate: "2026-05-20",
+  secondDayDate: "2026-05-22",
+  sessionsCount: 8,
+  weeklyFrequency: 2,
+})
+
   const availability =
     firstService && firstBlock
       ? await getAvailability(firstService.id, "2026-05-20", firstBlock.id)
@@ -47,6 +61,24 @@ export default async function Home() {
         <p>Disponible: {availability?.available ? "Sí" : "No"}</p>
         <p>Lugares restantes: {availability?.remaining}</p>
         <p>Mensaje: {availability?.message}</p>
+      </section>
+
+            <section className="mb-8 rounded-xl border p-4">
+        <h2 className="font-bold mb-2">Prueba de generación de sesiones</h2>
+
+        <h3 className="font-semibold">Paquete de 4 sesiones</h3>
+        <ul className="mb-4">
+          {testFourSessions.map((date) => (
+            <li key={date}>{date}</li>
+          ))}
+        </ul>
+
+        <h3 className="font-semibold">Paquete de 8 sesiones</h3>
+        <ul>
+          {testEightSessions.map((date) => (
+            <li key={date}>{date}</li>
+          ))}
+        </ul>
       </section>
 
       <section>
