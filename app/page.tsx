@@ -1,6 +1,8 @@
 import { supabase } from "../lib/supabaseClient"
 import { getAvailability, validateFullAvailability } from "../lib/availability";
 import { generateSessionDates } from "../lib/sessionGenerator"
+import { createReservation } from "../lib/reservationService"
+
 
 export default async function Home() {
   const { data: services, error: servicesError } = await supabase
@@ -28,14 +30,14 @@ export default async function Home() {
   )
 
 const testFourSessions = generateSessionDates({
-  startDate: "2026-05-20",
+  startDate: "2026-07-01",
   sessionsCount: 4,
   weeklyFrequency: 1,
 })
 
 const testEightSessions = generateSessionDates({
-  startDate: "2026-05-20",
-  secondDayDate: "2026-05-22",
+  startDate: "2026-07-01",
+  secondDayDate: "2026-07-03",
   sessionsCount: 8,
   weeklyFrequency: 2,
 })
@@ -52,7 +54,7 @@ const fullAvailabilityTest =
 
   const availability =
     firstService && firstBlock
-      ? await getAvailability(firstService.id, "2026-05-20", firstBlock.id)
+      ? await getAvailability(firstService.id, "2026-07-01", firstBlock.id)
       : null
 
   return (
@@ -64,7 +66,7 @@ const fullAvailabilityTest =
 
         <p>Servicio: {firstService?.name}</p>
         <p>Bloque: {firstBlock?.label}</p>
-        <p>Fecha de prueba: 2026-05-20</p>
+        <p>Fecha de prueba: 2026-07-01</p>
 
         <hr className="my-4" />
 
@@ -122,6 +124,37 @@ const fullAvailabilityTest =
           ))}
         </div>
       </section>
+      <section className="mt-8 rounded-xl border p-4">
+  <h2 className="font-bold mb-2">Crear reserva de prueba</h2>
+
+  <form
+    action={async () => {
+      "use server"
+
+      if (!firstService || !firstBlock) return
+
+      await createReservation({
+        serviceId: firstService.id,
+        startDate: "2026-07-01",
+        secondDayDate: "2026-07-03",
+        blockId: firstBlock.id,
+        peopleCount: 2,
+        name: "Test",
+        lastName: "User",
+        phone: "5511111111",
+        email: "test@email.com",
+      })
+    }}
+  >
+<button
+  className="bg-black text-white px-4 py-2 rounded"
+  disabled
+>
+  Procesando...
+</button>
+
+  </form>
+</section>
     </main>
   )
 }
