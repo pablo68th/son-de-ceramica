@@ -2,7 +2,7 @@ import { supabase } from "../lib/supabaseClient"
 import { getAvailability, validateFullAvailability } from "../lib/availability";
 import { generateSessionDates } from "../lib/sessionGenerator"
 import { createReservation } from "../lib/reservationService"
-
+import Link from "next/link"
 
 export default async function Home() {
   const { data: services, error: servicesError } = await supabase
@@ -152,9 +152,15 @@ const fullAvailabilityTest =
 >
   Procesando...
 </button>
-
   </form>
 </section>
+<Link
+  href="/reservar"
+  className="border px-4 py-2 rounded inline-block mb-4"
+>
+  Ir a reservar
+</Link>
+
     </main>
   )
 }
