@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { generateSessionPlan } from "../lib/sessionGenerator"
+import { validateSessionPlanAvailability } from "../lib/availability"
 
 type Service = {
   id: string
@@ -50,130 +52,322 @@ function formatDateForDisplay(dateString: string) {
   })
 }
 
-export default function BookingCalendar({ service, blocks }: Props) {
-  const [selectedDate, setSelectedDate] = useState("")
-  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
+function toDateInputValue(date: Date) {
+  return date.toISOString().split("T")[0]
+}
 
+function getTodayDate() {
+  return toDateInputValue(new Date())
+}
+
+function getMaxBookingDate() {
+  const date = new Date()
+  date.setMonth(date.getMonth() + 3)
+  return toDateInputValue(date)
+}
+
+export default function BookingCalendar({ service, blocks }: Props) {
   const router = useRouter()
+
+  const needsSecondDay = service.weekly_frequency === 2
+
+  const [firstDate, setFirstDate] = useState("")
+  const [firstBlockId, setFirstBlockId] = useState<string | null>(null)
+
+  const [secondDate, setSecondDate] = useState("")
+  const [secondBlockId, setSecondBlockId] = useState<string | null>(null)
+
+  const [availabilityError, setAvailabilityError] = useState("")
+
+  const today = getTodayDate()
+  const maxBookingDate = getMaxBookingDate()
+
   const allowedDays = useMemo(() => {
-    return Array.from(new Set(blocks.map((block) => block.day_of_week)))
+    return Array.from(new Set(blocks.map((b) => b.day_of_week)))
   }, [blocks])
 
-  const selectedDayOfWeek = selectedDate ? getDayOfWeek(selectedDate) : null
+  const firstDayOfWeek = firstDate ? getDayOfWeek(firstDate) : null
+  const secondDayOfWeek = secondDate ? getDayOfWeek(secondDate) : null
 
-  const blocksForSelectedDate =
-    selectedDayOfWeek === null
+  const isFirstDateAllowed =
+    Boolean(firstDate) &&
+    firstDate >= today &&
+    firstDate <= maxBookingDate &&
+    firstDayOfWeek !== null &&
+    allowedDays.includes(firstDayOfWeek)
+
+  const isSecondDateAllowed =
+    !needsSecondDay ||
+    (Boolean(secondDate) &&
+      secondDate >= today &&
+      secondDate <= maxBookingDate &&
+      secondDayOfWeek !== null &&
+      allowedDays.includes(secondDayOfWeek) &&
+      secondDayOfWeek !== firstDayOfWeek)
+
+  const firstBlocks =
+    firstDayOfWeek === null
       ? []
-      : blocks.filter((block) => block.day_of_week === selectedDayOfWeek)
+      : blocks.filter((b) => b.day_of_week === firstDayOfWeek)
 
-  const selectedBlock = blocks.find((block) => block.id === selectedBlockId)
+  const secondBlocks =
+    secondDayOfWeek === null
+      ? []
+      : blocks.filter((b) => b.day_of_week === secondDayOfWeek)
 
-  const isSelectedDateAllowed =
-    selectedDayOfWeek !== null && allowedDays.includes(selectedDayOfWeek)
+  const firstBlock = blocks.find((b) => b.id === firstBlockId)
+  const secondBlock = blocks.find((b) => b.id === secondBlockId)
+
+  const canGeneratePlan =
+    Boolean(firstDate) &&
+    Boolean(firstBlock) &&
+    isFirstDateAllowed &&
+    (!needsSecondDay ||
+      (Boolean(secondDate) &&
+        Boolean(secondBlock) &&
+        isSecondDateAllowed))
+
+  let sessionPlan: { date: string; blockId: string }[] = []
+
+  try {
+    if (canGeneratePlan && firstBlockId) {
+      sessionPlan = generateSessionPlan({
+        startDate: firstDate,
+        firstBlockId,
+        secondDayDate: needsSecondDay ? secondDate : undefined,
+        secondBlockId: needsSecondDay ? secondBlockId ?? undefined : undefined,
+        sessionsCount: service.sessions_count,
+        weeklyFrequency: service.weekly_frequency,
+      })
+    }
+  } catch {
+    sessionPlan = []
+  }
+
+  function getBlockLabel(blockId: string) {
+    const block = blocks.find((b) => b.id === blockId)
+
+    if (!block) return ""
+
+    return `${block.start_time} – ${block.end_time}`
+  }
 
   return (
     <section className="mt-6 rounded-xl border p-4">
-      <h2 className="text-lg font-semibold mb-4">Elige una fecha</h2>
+      <h2 className="text-lg font-semibold mb-4">Elige tus días</h2>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           <label className="mb-2 block text-sm text-gray-600">
-            Fecha
+            Primer día
           </label>
 
           <input
             type="date"
-            value={selectedDate}
-            onChange={(event) => {
-              setSelectedDate(event.target.value)
-              setSelectedBlockId(null)
+            value={firstDate}
+            min={today}
+            max={maxBookingDate}
+            onChange={(e) => {
+              setFirstDate(e.target.value)
+              setFirstBlockId(null)
+              setSecondDate("")
+              setSecondBlockId(null)
+              setAvailabilityError("")
             }}
-            className="w-full rounded-lg border px-3 py-2"
+            className="w-full cursor-pointer rounded-lg border bg-white px-4 py-3 pr-10 text-base"
           />
 
-          <p className="mt-3 text-sm text-gray-500">
-            Días disponibles:{" "}
-            {allowedDays.map((day) => daysMap[day]).join(", ")}
+          <p className="mt-2 text-xs text-gray-500">
+            Días disponibles: {allowedDays.map((d) => daysMap[d]).join(", ")}
           </p>
-        </div>
 
-        <div className="rounded-xl bg-gray-50 p-4">
-          {!selectedDate && (
-            <p className="text-sm text-gray-600">
-              Selecciona una fecha para ver los horarios disponibles.
+          {firstDate && !isFirstDateAllowed && (
+            <p className="mt-3 text-sm text-gray-600">
+              Ese día no está disponible para esta experiencia.
             </p>
           )}
 
-          {selectedDate && !isSelectedDateAllowed && (
-            <p className="text-sm text-gray-600">
-              Ese día no está disponible para esta experiencia. Elige otro día.
-            </p>
-          )}
-
-          {selectedDate && isSelectedDateAllowed && (
-            <>
-              <h3 className="font-medium">
-                {formatDateForDisplay(selectedDate)}
-              </h3>
-
-              <p className="mt-1 text-sm text-gray-600">
-                Horarios disponibles:
+          {firstDate && isFirstDateAllowed && (
+            <div className="mt-4">
+              <p className="mb-2 text-sm text-gray-600">
+                Horario del primer día
               </p>
 
-              <div className="mt-4 grid gap-3">
-                {blocksForSelectedDate.map((block) => {
-                  const isSelected = selectedBlockId === block.id
+              <div className="grid gap-3">
+                {firstBlocks.map((block) => {
+                  const isSelected = firstBlockId === block.id
 
                   return (
                     <button
                       key={block.id}
                       type="button"
-                      onClick={() => setSelectedBlockId(block.id)}
-                      className={`rounded-lg border p-3 text-left transition ${
-                        isSelected
-                          ? "border-black bg-black text-white"
-                          : "border-gray-200 bg-white"
+                      onClick={() => {
+                        setFirstBlockId(block.id)
+                        setAvailabilityError("")
+                      }}
+                      className={`rounded-lg border p-3 text-left ${
+                        isSelected ? "bg-black text-white" : "bg-white"
                       }`}
                     >
-                      <p className="font-medium">
-                        {block.start_time} – {block.end_time}
-                      </p>
+                      {block.start_time} – {block.end_time}
                     </button>
                   )
                 })}
               </div>
-            </>
+            </div>
           )}
 
-          {selectedBlock && selectedDate && (
-            <div className="mt-5 rounded-lg border bg-white p-3">
-              <p className="text-sm font-medium">Resumen</p>
+          {needsSecondDay && (
+            <div className="mt-6">
+              <label className="mb-2 block text-sm text-gray-600">
+                Segundo día
+              </label>
 
-              <p className="mt-2 text-sm text-gray-600">
-                {service.name}
+              <input
+                type="date"
+                value={secondDate}
+                min={today}
+                max={maxBookingDate}
+                disabled={!firstBlockId}
+                onChange={(e) => {
+                  setSecondDate(e.target.value)
+                  setSecondBlockId(null)
+                  setAvailabilityError("")
+                }}
+                className="w-full cursor-pointer rounded-lg border bg-white px-4 py-3 pr-10 text-base disabled:opacity-50"
+              />
+
+              <p className="mt-2 text-xs text-gray-500">
+                Debe ser un día de la semana distinto al primero.
               </p>
 
-              <p className="text-sm text-gray-600">
-                {formatDateForDisplay(selectedDate)}
-              </p>
+              {secondDate && !isSecondDateAllowed && (
+                <p className="mt-3 text-sm text-gray-600">
+                  Ese segundo día no es válido. Elige otro día disponible y distinto.
+                </p>
+              )}
 
-              <p className="text-sm text-gray-600">
-                {selectedBlock.start_time} – {selectedBlock.end_time}
-              </p>
+              {secondDate && isSecondDateAllowed && (
+                <div className="mt-4">
+                  <p className="mb-2 text-sm text-gray-600">
+                    Horario del segundo día
+                  </p>
 
-            <button
-            type="button"
-            onClick={() => {
-                if (!selectedDate || !selectedBlockId) return
+                  <div className="grid gap-3">
+                    {secondBlocks.map((block) => {
+                      const isSelected = secondBlockId === block.id
 
-                router.push(
-                `/reservar/${service.slug}/datos?date=${selectedDate}&blockId=${selectedBlockId}`
-                )
-            }}
-            className="mt-4 w-full rounded bg-black px-4 py-2 text-white"
-            >
-            Continuar
-            </button>
+                      return (
+                        <button
+                          key={block.id}
+                          type="button"
+                          onClick={() => {
+                            setSecondBlockId(block.id)
+                            setAvailabilityError("")
+                          }}
+                          className={`rounded-lg border p-3 text-left ${
+                            isSelected ? "bg-black text-white" : "bg-white"
+                          }`}
+                        >
+                          {block.start_time} – {block.end_time}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-xl bg-gray-50 p-4">
+          {!firstDate && (
+            <p className="text-sm text-gray-600">
+              Selecciona una fecha para ver los horarios disponibles.
+            </p>
+          )}
+
+          {firstDate && (
+            <div>
+              <p className="font-medium">Resumen</p>
+
+              <p className="mt-2 text-sm text-gray-600">{service.name}</p>
+
+              {firstDate && firstBlock && (
+                <p className="text-sm text-gray-600">
+                  Primer día: {formatDateForDisplay(firstDate)} ·{" "}
+                  {firstBlock.start_time} – {firstBlock.end_time}
+                </p>
+              )}
+
+              {needsSecondDay && secondDate && secondBlock && (
+                <p className="text-sm text-gray-600">
+                  Segundo día: {formatDateForDisplay(secondDate)} ·{" "}
+                  {secondBlock.start_time} – {secondBlock.end_time}
+                </p>
+              )}
+
+              {sessionPlan.length > 0 && (
+                <>
+                  <p className="mt-4 text-sm text-gray-600">
+                    Sesiones incluidas:
+                  </p>
+
+                  <ul className="mt-2 space-y-1 text-sm text-gray-600">
+                    {sessionPlan.map((session, index) => (
+                      <li key={`${session.date}-${session.blockId}-${index}`}>
+                        • {formatDateForDisplay(session.date)} —{" "}
+                        {getBlockLabel(session.blockId)}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {availabilityError && (
+                <p className="mt-3 text-sm text-red-600">
+                  {availabilityError}
+                </p>
+              )}
+
+              {canGeneratePlan && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!firstBlockId) return
+
+                    setAvailabilityError("")
+
+                    const peopleCount =
+                      service.slug === "torno-en-pareja" ? 2 : 1
+
+                    const result = await validateSessionPlanAvailability({
+                      serviceId: service.id,
+                      sessions: sessionPlan,
+                      peopleCount,
+                    })
+
+                    if (!result.allAvailable) {
+                      setAvailabilityError(
+                        "No hay disponibilidad en todas las sesiones."
+                      )
+                      return
+                    }
+
+                    const secondParams =
+                      needsSecondDay && secondDate && secondBlockId
+                        ? `&secondDate=${secondDate}&secondBlockId=${secondBlockId}`
+                        : ""
+
+                    router.push(
+                      `/reservar/${service.slug}/datos?date=${firstDate}&blockId=${firstBlockId}${secondParams}`
+                    )
+                  }}
+                  className="mt-4 w-full rounded bg-black px-4 py-2 text-white"
+                >
+                  Continuar
+                </button>
+              )}
             </div>
           )}
         </div>

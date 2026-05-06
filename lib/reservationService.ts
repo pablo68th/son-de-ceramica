@@ -1,12 +1,13 @@
 import { supabase } from "./supabaseClient"
-import { generateSessionDates } from "./sessionGenerator"
-import { validateFullAvailability } from "./availability"
+import { generateSessionPlan } from "./sessionGenerator"
+import { validateSessionPlanAvailability } from "./availability"
 
 type CreateReservationParams = {
   serviceId: string
   startDate: string
   secondDayDate?: string
   blockId: string
+  secondBlockId?: string
   peopleCount: number
   name: string
   lastName: string
@@ -25,17 +26,18 @@ export async function createReservation(params: CreateReservationParams) {
     throw new Error("Servicio no encontrado")
   }
 
-  const dates = generateSessionDates({
+  const sessionPlan = generateSessionPlan({
     startDate: params.startDate,
+    firstBlockId: params.blockId,
     secondDayDate: params.secondDayDate,
+    secondBlockId: params.secondBlockId,
     sessionsCount: service.sessions_count,
     weeklyFrequency: service.weekly_frequency,
   })
 
-  const validation = await validateFullAvailability({
+  const validation = await validateSessionPlanAvailability({
     serviceId: params.serviceId,
-    dates,
-    blockId: params.blockId,
+    sessions: sessionPlan,
     peopleCount: params.peopleCount,
   })
 
@@ -58,15 +60,15 @@ export async function createReservation(params: CreateReservationParams) {
     .select()
     .single()
 
-if (reservationError || !reservation) {
-  console.error("reservationError:", reservationError)
-  throw new Error(reservationError?.message || "Error creando la reserva")
-}
-  const sessions = dates.map((date) => ({
+  if (reservationError || !reservation) {
+    throw new Error(reservationError?.message || "Error creando la reserva")
+  }
+
+  const sessions = sessionPlan.map((session) => ({
     reservation_id: reservation.id,
     service_id: params.serviceId,
-    session_date: date,
-    block_id: params.blockId,
+    session_date: session.date,
+    block_id: session.blockId,
     people_count: params.peopleCount,
     status: "confirmed",
   }))
@@ -76,7 +78,7 @@ if (reservationError || !reservation) {
     .insert(sessions)
 
   if (sessionsError) {
-    throw new Error("Error creando sesiones")
+    throw new Error(sessionsError.message || "Error creando sesiones")
   }
 
   return {
@@ -84,3 +86,4 @@ if (reservationError || !reservation) {
     sessions,
   }
 }
+

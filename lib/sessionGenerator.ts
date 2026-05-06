@@ -1,8 +1,22 @@
-type GenerateSessionsParams = {
+type GenerateSessionDatesParams = {
   startDate: string
   sessionsCount: number
   weeklyFrequency: number
   secondDayDate?: string
+}
+
+type GenerateSessionPlanParams = {
+  startDate: string
+  firstBlockId: string
+  sessionsCount: number
+  weeklyFrequency: number
+  secondDayDate?: string
+  secondBlockId?: string
+}
+
+export type SessionPlanItem = {
+  date: string
+  blockId: string
 }
 
 function addDays(date: Date, days: number) {
@@ -20,37 +34,70 @@ export function generateSessionDates({
   sessionsCount,
   weeklyFrequency,
   secondDayDate,
-}: GenerateSessionsParams) {
+}: GenerateSessionDatesParams) {
+  const plan = generateSessionPlan({
+    startDate,
+    firstBlockId: "TEMP_BLOCK",
+    sessionsCount,
+    weeklyFrequency,
+    secondDayDate,
+    secondBlockId: secondDayDate ? "TEMP_BLOCK" : undefined,
+  })
+
+  return plan.map((session) => session.date)
+}
+
+export function generateSessionPlan({
+  startDate,
+  firstBlockId,
+  sessionsCount,
+  weeklyFrequency,
+  secondDayDate,
+  secondBlockId,
+}: GenerateSessionPlanParams): SessionPlanItem[] {
   const firstDate = new Date(`${startDate}T12:00:00`)
 
   if (weeklyFrequency === 1) {
-    return Array.from({ length: sessionsCount }, (_, index) => {
-      return toDateString(addDays(firstDate, index * 7))
-    })
+    return Array.from({ length: sessionsCount }, (_, index) => ({
+      date: toDateString(addDays(firstDate, index * 7)),
+      blockId: firstBlockId,
+    }))
   }
 
   if (weeklyFrequency === 2) {
-    if (!secondDayDate) {
-      throw new Error("secondDayDate is required for weeklyFrequency 2")
+    if (!secondDayDate || !secondBlockId) {
+      throw new Error(
+        "secondDayDate and secondBlockId are required for weeklyFrequency 2"
+      )
     }
 
     const secondDate = new Date(`${secondDayDate}T12:00:00`)
 
     if (toDateString(firstDate) === toDateString(secondDate)) {
-      throw new Error("The two selected days must be different")
+      throw new Error("The two selected dates must be different")
     }
 
-    const dates: string[] = []
+    if (firstDate.getDay() === secondDate.getDay()) {
+      throw new Error("The two selected weekdays must be different")
+    }
 
-    for (let week = 0; dates.length < sessionsCount; week++) {
-      dates.push(toDateString(addDays(firstDate, week * 7)))
+    const sessions: SessionPlanItem[] = []
 
-      if (dates.length < sessionsCount) {
-        dates.push(toDateString(addDays(secondDate, week * 7)))
+    for (let week = 0; sessions.length < sessionsCount; week++) {
+      sessions.push({
+        date: toDateString(addDays(firstDate, week * 7)),
+        blockId: firstBlockId,
+      })
+
+      if (sessions.length < sessionsCount) {
+        sessions.push({
+          date: toDateString(addDays(secondDate, week * 7)),
+          blockId: secondBlockId,
+        })
       }
     }
 
-    return dates
+    return sessions
   }
 
   throw new Error("Unsupported weeklyFrequency")

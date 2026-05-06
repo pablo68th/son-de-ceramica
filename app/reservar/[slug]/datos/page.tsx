@@ -8,6 +8,8 @@ type PageProps = {
   searchParams: Promise<{
     date?: string
     blockId?: string
+    secondDate?: string
+    secondBlockId?: string
   }>
 }
 
@@ -16,7 +18,7 @@ export default async function DatosPage({
   searchParams,
 }: PageProps) {
   const { slug } = await params
-  const { date, blockId } = await searchParams
+  const { date, blockId, secondDate, secondBlockId } = await searchParams
 
   if (!date || !blockId) {
     return (
@@ -38,6 +40,15 @@ export default async function DatosPage({
     .eq("id", blockId)
     .single()
 
+  const { data: secondBlock } =
+    secondBlockId
+      ? await supabase
+          .from("schedule_blocks")
+          .select("*")
+          .eq("id", secondBlockId)
+          .single()
+      : { data: null }
+
   if (serviceError || blockError || !service || !block) {
     return (
       <main className="p-6">
@@ -57,13 +68,28 @@ export default async function DatosPage({
 
         <div className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
           <p>{service.name}</p>
-          <p>Fecha: {date}</p>
+          <p>Primer día: {date}</p>
           <p>
             Horario: {block.start_time} – {block.end_time}
           </p>
+
+          {secondDate && secondBlock && (
+            <>
+              <p className="mt-2">Segundo día: {secondDate}</p>
+              <p>
+                Horario: {secondBlock.start_time} – {secondBlock.end_time}
+              </p>
+            </>
+          )}
         </div>
 
-        <ReservationForm service={service} date={date} blockId={blockId} />
+        <ReservationForm
+          service={service}
+          date={date}
+          blockId={blockId}
+          secondDate={secondDate}
+          secondBlockId={secondBlockId}
+        />
       </section>
     </main>
   )

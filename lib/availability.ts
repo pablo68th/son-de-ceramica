@@ -19,7 +19,7 @@ export async function getAvailability(
     }
   }
 
-const { data: blocked } = await supabase
+  const { data: blocked } = await supabase
     .from("blocked_dates")
     .select("*")
     .eq("blocked_date", date)
@@ -93,6 +93,41 @@ export async function validateFullAvailability({
 
   return {
     allAvailable,
+    results,
+  }
+}
+
+export async function validateSessionPlanAvailability({
+  serviceId,
+  sessions,
+  peopleCount,
+}: {
+  serviceId: string
+  sessions: { date: string; blockId: string }[]
+  peopleCount: number
+}) {
+  const results = []
+
+  for (const session of sessions) {
+    const availability = await getAvailability(
+      serviceId,
+      session.date,
+      session.blockId
+    )
+
+    const hasEnoughSpace = availability.remaining >= peopleCount
+
+    results.push({
+      date: session.date,
+      blockId: session.blockId,
+      available: hasEnoughSpace,
+      remaining: availability.remaining,
+      message: availability.message,
+    })
+  }
+
+  return {
+    allAvailable: results.every((result) => result.available),
     results,
   }
 }

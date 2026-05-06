@@ -14,9 +14,17 @@ type Props = {
   service: Service
   date: string
   blockId: string
+  secondDate?: string
+  secondBlockId?: string
 }
 
-export function ReservationForm({ service, date, blockId }: Props) {
+export function ReservationForm({
+  service,
+  date,
+  blockId,
+  secondDate,
+  secondBlockId,
+}: Props) {
   const isCoupleService = service.slug === "torno-en-pareja"
 
   const [name, setName] = useState("")
@@ -46,16 +54,18 @@ export function ReservationForm({ service, date, blockId }: Props) {
     try {
       setIsSubmitting(true)
 
-      await createReservation({
-        serviceId: service.id,
-        startDate: date,
-        blockId,
-        peopleCount,
-        name,
-        lastName,
-        phone,
-        email,
-      })
+await createReservation({
+  serviceId: service.id,
+  startDate: date,
+  secondDayDate: secondDate,
+  blockId,
+  secondBlockId,
+  peopleCount,
+  name,
+  lastName,
+  phone,
+  email,
+})
 
       setSuccessMessage("Tu reserva quedó confirmada.")
     } catch (error) {
