@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient"
+import { PaymentToggle } from "../../components/PaymentToggle"
 
 export default async function AdminPage() {
   const { data: sessions, error } = await supabase
@@ -84,10 +85,11 @@ export default async function AdminPage() {
                   </p>
                 </div>
 
-                <div className="rounded-full border px-3 py-1 text-sm">
-                  {session.reservations.payment_status === "paid"
-                    ? "Pagado"
-                    : "Pendiente"}
+                <div>
+                  <PaymentToggle
+                    reservationId={session.reservations.id}
+                    initialStatus={session.reservations.payment_status}
+                  />
                 </div>
               </div>
 
