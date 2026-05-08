@@ -1,10 +1,22 @@
 import Link from "next/link"
 
 const experiences = [
-  "Torno en pareja",
-  "Cerámica para niñ@s",
-  "Clases de torno",
-  "Construcción manual",
+  {
+    name: "Torno en pareja",
+    slug: "torno-en-pareja",
+  },
+  {
+    name: "Cerámica para niñ@s",
+    slug: "ceramica-para-ninos",
+  },
+  {
+    name: "Clases de torno",
+    slug: "clases-de-torno-4-sesiones",
+  },
+  {
+    name: "Construcción manual",
+    slug: "construccion-manual-4-sesiones",
+  },
 ]
 
 export default function Home() {
@@ -57,7 +69,7 @@ export default function Home() {
           <div className="mt-6 grid grid-cols-2 gap-4">
             {experiences.map((experience) => (
               <article
-                key={experience}
+                key={experience.slug}
                 className="overflow-hidden rounded-2xl bg-white shadow-sm"
               >
                 <div className="h-28 bg-[#DCCEC4]">
@@ -66,14 +78,14 @@ export default function Home() {
 
                 <div className="p-3">
                   <h3 className="text-sm font-medium leading-5">
-                    {experience}
+                    {experience.name}
                   </h3>
 
                   <Link
-                    href="/reservar"
+                    href={`/reservar/${experience.slug}`}
                     className="mt-3 block rounded-xl border border-[#59B9C6] px-3 py-2 text-center text-xs font-medium text-[#459EAA]"
                   >
-                    dddddddd
+                    Reservar
                   </Link>
                 </div>
               </article>
