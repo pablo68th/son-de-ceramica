@@ -73,7 +73,7 @@ export default function Home() {
                     href="/reservar"
                     className="mt-3 block rounded-xl border border-[#59B9C6] px-3 py-2 text-center text-xs font-medium text-[#459EAA]"
                   >
-                    Reservar
+                    dddddddd
                   </Link>
                 </div>
               </article>
