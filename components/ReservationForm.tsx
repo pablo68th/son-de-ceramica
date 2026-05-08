@@ -84,18 +84,18 @@ export function ReservationForm({
     try {
       setIsSubmitting(true)
 
-      await createReservation({
-        serviceId: service.id,
-        startDate: "",
-        blockId: "",
-        peopleCount,
-        secondDayDate: undefined,
-        secondBlockId: undefined,
-        name: name.trim(),
-        lastName: lastName.trim(),
-        phone: cleanPhone,
-        email: email.trim().toLowerCase(),
-      })
+    await createReservation({
+      serviceId: service.id,
+      startDate: date,
+      blockId,
+      secondDayDate: secondDate,
+      secondBlockId,
+      peopleCount,
+      name: name.trim(),
+      lastName: lastName.trim(),
+      phone: cleanPhone,
+      email: email.trim().toLowerCase(),
+    })
 
       setSuccessMessage("Tu reserva quedó confirmada.")
     } catch (error) {
@@ -117,7 +117,7 @@ export function ReservationForm({
         </div>
 
         <p className="mt-5 text-xs uppercase tracking-[0.24em] text-[#59B9C6]">
-          Último paso
+          Experiencia reservada
         </p>
 
         <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">
@@ -145,9 +145,9 @@ export function ReservationForm({
   if (step === "review") {
     return (
       <div className="mt-6 rounded-[2rem] bg-[#F7F5F2] p-5">
-        <p className="text-xs uppercase tracking-[0.24em] text-[#59B9C6]">
-          Último paso
-        </p>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#59B9C6]">
+            Revisión final
+          </p>
 
         <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">
           Revisa tu información
@@ -197,6 +197,16 @@ export function ReservationForm({
           )}
         </div>
 
+              <div>
+        <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
+          Experiencia
+        </p>
+
+        <p className="mt-1 text-base font-medium">
+          {service.name}
+        </p>
+      </div>
+      
         {errorMessage && (
           <p className="mt-4 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
             {errorMessage}
