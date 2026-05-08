@@ -1,6 +1,5 @@
 import { supabase } from "../../lib/supabaseClient"
-import { PaymentToggle } from "../../components/PaymentToggle"
-import { CancelReservationButton } from "../../components/CancelReservationButton"
+import { AdminReservationsList } from "../../components/AdminReservationsList"
 
 export default async function AdminPage() {
   const { data: sessions, error } = await supabase
@@ -39,20 +38,6 @@ export default async function AdminPage() {
     )
   }
 
-  const groupedSessions = (sessions ?? []).reduce((groups: any, session: any) => {
-    const date = session.session_date || "Sin fecha"
-
-    if (!groups[date]) {
-      groups[date] = []
-    }
-
-    groups[date].push(session)
-
-    return groups
-  }, {})
-
-  const groupedEntries = Object.entries(groupedSessions)
-
   return (
     <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#1F1F1F]">
       <section className="mx-auto max-w-5xl">
@@ -70,91 +55,13 @@ export default async function AdminPage() {
           </h1>
 
           <p className="mt-2 text-gray-600">
-            Revisa las reservas registradas, datos de contacto y estado de pago.
+            Revisa las reservas registradas, datos de contacto, estado de pago y estado de la reserva.
           </p>
         </div>
 
-        <div className="mt-8 space-y-8">
-          {groupedEntries.map(([date, dateSessions]: any) => (
-            <section key={date}>
-              <h2 className="mb-3 text-lg font-light text-[#1F1F1F]">
-                {date === "Sin fecha"
-                  ? "Sin fecha"
-                  : new Date(date + "T00:00:00").toLocaleDateString("es-MX", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-              </h2>
-
-              <div className="grid gap-4">
-                {dateSessions.map((session: any) => (
-                  <article
-                    key={session.id}
-                    className="rounded-3xl bg-white p-5 shadow-sm"
-                  >
-                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <h3 className="text-lg font-medium">
-                          {session.reservations.customer_name}{" "}
-                          {session.reservations.customer_last_name}
-                        </h3>
-
-                        <p className="mt-1 text-sm text-gray-600">
-                          {session.services.name}
-                        </p>
-
-                        <p className="mt-1 text-sm text-gray-600">
-                          {session.schedule_blocks
-                            ? `${session.schedule_blocks.start_time.slice(0, 5)} – ${session.schedule_blocks.end_time.slice(0, 5)}`
-                            : "Horario no disponible"}
-                        </p>
-
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
-                            Personas: {session.people_count}
-                          </span>
-
-                          <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
-                            Estado: {session.status}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-start gap-2 md:items-end">
-                        <PaymentToggle
-                          reservationId={session.reservations.id}
-                          initialStatus={session.reservations.payment_status}
-                        />
-
-                        {session.status !== "cancelled" ? (
-                          <CancelReservationButton reservationId={session.reservations.id} />
-                        ) : (
-                          <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm text-red-700">
-                            Cancelada
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-4 border-t border-gray-100 pt-4 text-sm text-gray-600">
-                      <p>Tel: {session.reservations.phone}</p>
-                      <p>Correo: {session.reservations.email}</p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-          ))}
-
-          {sessions?.length === 0 && (
-            <div className="rounded-3xl bg-white p-6 shadow-sm">
-              No hay reservas registradas todavía.
-            </div>
-          )}
-        </div>
+        <AdminReservationsList sessions={sessions ?? []} />
       </section>
     </main>
   )
 }
+
