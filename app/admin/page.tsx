@@ -40,7 +40,7 @@ export default async function AdminPage() {
 
   return (
     <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#1F1F1F]">
-      <section className="mx-auto max-w-5xl">
+      <section className="animate-soft-enter mx-auto max-w-5xl">
         <a href="/" className="text-sm text-[#1F1F1F]/70 underline">
           Volver al inicio
         </a>
