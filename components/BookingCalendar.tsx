@@ -153,11 +153,11 @@ export default function BookingCalendar({ service, blocks }: Props) {
   }
 
   return (
-    <section className="mt-6 rounded-xl border p-4">
+    <section className="mt-6 rounded-[2rem] border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
       <h2 className="text-lg font-semibold mb-4">Elige tus días</h2>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div>
+        <div className="min-w-0">
           <label className="mb-2 block text-sm text-gray-600">
             Primer día
           </label>
@@ -174,7 +174,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
               setSecondBlockId(null)
               setAvailabilityError("")
             }}
-            className="w-full cursor-pointer rounded-lg border bg-white px-4 py-3 pr-10 text-base"
+            className="w-full min-w-0 appearance-none rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base text-[#1F1F1F]"
           />
 
           <p className="mt-2 text-xs text-gray-500">
@@ -234,7 +234,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
                   setSecondBlockId(null)
                   setAvailabilityError("")
                 }}
-                className="w-full cursor-pointer rounded-lg border bg-white px-4 py-3 pr-10 text-base disabled:opacity-50"
+                className="w-full min-w-0 appearance-none rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base text-[#1F1F1F] disabled:opacity-50"
               />
 
               <p className="mt-2 text-xs text-gray-500">
@@ -280,7 +280,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
           )}
         </div>
 
-        <div className="rounded-xl bg-gray-50 p-4">
+        <div className="min-w-0 rounded-2xl bg-[#F7F5F2] p-4">
           {!firstDate && (
             <p className="text-sm text-gray-600">
               Selecciona una fecha para ver los horarios disponibles.
