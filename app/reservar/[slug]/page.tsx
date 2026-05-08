@@ -21,7 +21,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
     return (
       <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#333333]">
         <section className="mx-auto max-w-md rounded-[2rem] bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-light">Servicio no encontrado</h1>
+          <h1 className="text-2xl font-normal">Servicio no encontrado</h1>
 
           <Link
             href="/reservar"
@@ -92,7 +92,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
                 Experiencia
               </p>
 
-              <h1 className="mt-2 text-3xl font-light leading-tight tracking-[-0.03em]">
+              <h1 className="mt-2 text-3xl font-normal leading-tight tracking-[-0.03em]">
                 {service.name}
               </h1>
             </div>
@@ -100,7 +100,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
 
           <div className="grid grid-cols-3 gap-3 p-5">
             <div className="rounded-2xl bg-[#F7F5F2] p-4 text-center">
-              <p className="text-lg font-light">
+              <p className="text-lg font-normal">
                 ${service.price_mxn}
               </p>
 
@@ -110,7 +110,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
             </div>
 
             <div className="rounded-2xl bg-[#F7F5F2] p-4 text-center">
-              <p className="text-lg font-light">
+              <p className="text-lg font-normal">
                 {service.sessions_count}
               </p>
 
@@ -120,7 +120,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
             </div>
 
             <div className="rounded-2xl bg-[#F7F5F2] p-4 text-center">
-              <p className="text-lg font-light">
+              <p className="text-lg font-normal">
                 {service.capacity}
               </p>
 
