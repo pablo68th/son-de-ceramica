@@ -108,7 +108,7 @@ export function ReservationForm({
           ♡
         </div>
 
-        <h2 className="mt-5 text-3xl font-light tracking-[-0.03em]">
+        <h2 className="mt-5 text-3xl font-semibold tracking-[-0.03em]">
           Reserva confirmada
         </h2>
 
@@ -122,7 +122,7 @@ export function ReservationForm({
 
         <a
           href="/"
-          className="mt-6 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-sm font-semibold text-white transition hover:bg-[#4ca9b5]"
+          className="mt-6 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-sm font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
         >
           Volver al inicio
         </a>
@@ -136,14 +136,14 @@ export function ReservationForm({
         value={name}
         onChange={(event) => setName(event.target.value)}
         placeholder="Nombre"
-        className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6]"
+        className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6] focus:ring-2 focus:ring-[#59B9C6]/10"
       />
 
       <input
         value={lastName}
         onChange={(event) => setLastName(event.target.value)}
         placeholder="Apellido"
-        className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6]"
+        className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6] focus:ring-2 focus:ring-[#59B9C6]/10"
       />
 
       <input
@@ -153,7 +153,7 @@ export function ReservationForm({
         }
         placeholder="Teléfono a 10 dígitos"
         inputMode="numeric"
-        className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6]"
+        className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6] focus:ring-2 focus:ring-[#59B9C6]/10"
       />
 
       <input
@@ -161,7 +161,7 @@ export function ReservationForm({
         onChange={(event) => setEmail(event.target.value)}
         placeholder="Correo electrónico"
         type="email"
-        className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6]"
+        className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6] focus:ring-2 focus:ring-[#59B9C6]/10"
       />
 
       {!isCoupleService && (
@@ -173,7 +173,7 @@ export function ReservationForm({
           <select
             value={peopleCount}
             onChange={(event) => setPeopleCount(Number(event.target.value))}
-            className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6]"
+            className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6] focus:ring-2 focus:ring-[#59B9C6]/10"
           >
             <option value={1}>1 persona</option>
             <option value={2}>2 personas</option>
@@ -223,9 +223,11 @@ export function ReservationForm({
         type="button"
         onClick={handleSubmit}
         disabled={isSubmitting}
-        className="mt-2 rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#4ca9b5] disabled:opacity-50"
+        className="mt-2 rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5] disabled:opacity-50"
       >
-        {isSubmitting ? "Confirmando..." : "Confirmar reserva"}
+        isSubmitting
+  ? "Confirmando reserva..."
+  : "Confirmar reserva"
       </button>
     </div>
   )

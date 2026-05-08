@@ -37,9 +37,9 @@ export function AdminReservationsList({ sessions }: Props) {
         <button
           type="button"
           onClick={() => setFilter("active")}
-          className={`rounded-full border px-4 py-2 text-sm ${
+          className={`rounded-full border px-4 py-2 text-sm font-medium transition active:scale-[0.98] ${
             filter === "active"
-              ? "border-black bg-black text-white"
+              ? "border-[#59B9C6] bg-[#59B9C6] text-white"
               : "border-gray-300 bg-white text-gray-700"
           }`}
         >
@@ -74,7 +74,7 @@ export function AdminReservationsList({ sessions }: Props) {
       <div className="mt-8 space-y-8">
         {groupedEntries.map(([date, dateSessions]: any) => (
           <section key={date}>
-            <h2 className="mb-3 text-lg font-light text-[#1F1F1F]">
+            <h2 className="mb-3 text-xl font-semibold tracking-[-0.03em] text-[#1F1F1F]">
               {date === "Sin fecha"
                 ? "Sin fecha"
                 : new Date(date + "T00:00:00").toLocaleDateString("es-MX", {
@@ -90,12 +90,14 @@ export function AdminReservationsList({ sessions }: Props) {
                 <article
                   key={session.id}
                   className={`rounded-3xl bg-white p-5 shadow-sm ${
-                    session.status === "cancelled" ? "opacity-60" : ""
+                    session.status === "cancelled"
+  ? "border border-red-100 bg-red-50/40"
+  : ""
                   }`}
                 >
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div>
-                      <h3 className="text-lg font-medium">
+                      <h3 className="text-lg font-semibold tracking-[-0.02em]">
                         {session.reservations.customer_name}{" "}
                         {session.reservations.customer_last_name}
                       </h3>
@@ -138,10 +140,16 @@ export function AdminReservationsList({ sessions }: Props) {
                     </div>
                   </div>
 
-                  <div className="mt-4 border-t border-gray-100 pt-4 text-sm text-gray-600">
-                    <p>Tel: {session.reservations.phone}</p>
-                    <p>Correo: {session.reservations.email}</p>
-                  </div>
+                    <details className="mt-4 border-t border-gray-100 pt-4">
+                      <summary className="cursor-pointer list-none text-sm font-medium text-[#59B9C6]">
+                        Ver detalles
+                      </summary>
+
+                      <div className="mt-3 text-sm text-gray-600">
+                        <p>Tel: {session.reservations.phone}</p>
+                        <p>Correo: {session.reservations.email}</p>
+                      </div>
+                    </details>
                 </article>
               ))}
             </div>
@@ -149,7 +157,7 @@ export function AdminReservationsList({ sessions }: Props) {
         ))}
 
         {filteredSessions.length === 0 && (
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="rounded-3xl bg-white p-6 text-center shadow-sm">
             No hay reservas para este filtro.
           </div>
         )}

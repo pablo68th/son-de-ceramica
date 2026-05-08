@@ -19,7 +19,7 @@ export default async function ReservarPage() {
     return (
       <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#333333]">
         <div className="mx-auto max-w-md rounded-[2rem] bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-light">
+          <h1 className="text-2xl font-normal">
             Error cargando servicios
           </h1>
 
@@ -40,14 +40,14 @@ export default async function ReservarPage() {
               Son de Cerámica
             </p>
 
-            <h1 className="mt-2 text-3xl font-light leading-tight">
+            <h1 className="mt-2 text-3xl font-normal leading-tight">
               Elige tu experiencia
             </h1>
           </div>
 
           <Link
             href="/"
-            className="rounded-full bg-white px-4 py-2 text-sm shadow-sm"
+            className="rounded-full bg-white px-4 py-2 text-sm font-medium shadow-sm transition active:scale-[0.98]"
           >
             Inicio
           </Link>
@@ -71,7 +71,7 @@ export default async function ReservarPage() {
                     Experiencia
                   </p>
 
-                  <h2 className="mt-2 text-2xl font-light leading-tight">
+                  <h2 className="mt-2 text-2xl font-semibold leading-tight tracking-[-0.03em]">
                     {service.name}
                   </h2>
                 </div>
@@ -84,7 +84,7 @@ export default async function ReservarPage() {
                       Desde
                     </p>
 
-                    <p className="text-xl font-light">
+                    <p className="text-xl font-medium">
                       ${service.price_mxn} MXN
                     </p>
                   </div>
@@ -97,7 +97,7 @@ export default async function ReservarPage() {
 
                 <Link
                   href={`/reservar/${service.slug}`}
-                  className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white transition hover:bg-[#4ca9b5]"
+                  className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
                 >
                   Reservar experiencia
                 </Link>

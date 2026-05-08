@@ -35,13 +35,13 @@ export default async function DatosPage({
     return (
       <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#333333]">
         <section className="mx-auto max-w-md rounded-[2rem] bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-light">
+          <h1 className="text-2xl font-semibold tracking-[-0.03em]">
             Falta información de la reserva
           </h1>
 
           <Link
             href={`/reservar/${slug}`}
-            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white"
+            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
           >
             Volver a elegir horario
           </Link>
@@ -75,7 +75,7 @@ export default async function DatosPage({
     return (
       <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#333333]">
         <section className="mx-auto max-w-md rounded-[2rem] bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-light">
+          <h1 className="text-2xl font-semibold tracking-[-0.03em]">
             Error cargando la información de la reserva
           </h1>
 
@@ -96,7 +96,7 @@ export default async function DatosPage({
         <div className="mb-5 flex items-center justify-between">
           <Link
             href={`/reservar/${slug}`}
-            className="rounded-full bg-white px-4 py-2 text-sm shadow-sm"
+            className="rounded-full bg-white px-4 py-2 text-sm font-medium shadow-sm transition active:scale-[0.98]"
           >
             Volver
           </Link>
@@ -115,7 +115,7 @@ export default async function DatosPage({
                 Último paso
               </p>
 
-              <h1 className="mt-3 text-3xl font-light leading-tight tracking-[-0.03em]">
+              <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.03em]">
                 Completa tu reserva
               </h1>
 
@@ -127,7 +127,7 @@ export default async function DatosPage({
 
           <div className="p-5">
             <div className="rounded-[1.5rem] bg-[#F7F5F2] p-5 text-sm text-[#333333]/70">
-              <p className="text-base font-medium text-[#333333]">
+              <p className="text-lg font-semibold tracking-[-0.02em] text-[#333333]">
                 {service.name}
               </p>
 

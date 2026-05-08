@@ -37,7 +37,7 @@ export default function Home() {
           </div>
 
           <div className="absolute bottom-24 left-6 right-6 z-10">
-            <h1 className="text-5xl font-light leading-[0.98] tracking-[-0.05em] text-white">
+            <h1 className="text-5xl font-normal leading-[0.98] tracking-[-0.05em] text-white">
               Son de cerámica
             </h1>
 
@@ -49,7 +49,7 @@ export default function Home() {
           <div className="absolute bottom-8 left-6 right-6 z-10">
             <Link
               href="/reservar"
-              className="block rounded-2xl bg-[#59B9C6] px-6 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/10 transition hover:bg-[#4ca9b5]"
+              className="block rounded-2xl bg-[#59B9C6] px-6 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/10 transition active:scale-[0.98] hover:bg-[#4ca9b5]"
             >
               Reservar clase
             </Link>
@@ -62,7 +62,7 @@ export default function Home() {
         <section className="-mt-6 rounded-t-[2rem] bg-[#F7F5F2] px-5 pb-8 pt-8">
           <div className="mx-auto mb-6 h-1 w-10 rounded-full bg-[#59B9C6]" />
 
-          <h2 className="text-center text-2xl font-light">
+          <h2 className="text-center text-2xl font-normal">
             Nuestras experiencias
           </h2>
 
@@ -83,7 +83,7 @@ export default function Home() {
 
                   <Link
                     href={`/reservar/${experience.slug}`}
-                    className="mt-3 block rounded-xl border border-[#59B9C6] px-3 py-2 text-center text-xs font-medium text-[#459EAA]"
+                    className="mt-3 block rounded-xl border border-[#59B9C6] px-3 py-2 text-center text-xs font-semibold text-[#459EAA] transition active:scale-[0.98] active:bg-[#59B9C6] active:text-white"
                   >
                     Reservar
                   </Link>
@@ -93,7 +93,7 @@ export default function Home() {
           </div>
 
           <section className="mt-8 rounded-[1.5rem] bg-white p-5 shadow-sm">
-            <h2 className="text-center text-lg font-light">
+            <h2 className="text-center text-lg font-normal">
               ¿Cómo funciona?
             </h2>
 
@@ -118,7 +118,7 @@ export default function Home() {
           <div className="sticky bottom-4 mt-8">
             <Link
               href="/reservar"
-              className="block rounded-2xl bg-[#59B9C6] px-6 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/10"
+              className="block rounded-2xl bg-[#59B9C6] px-6 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/10 transition active:scale-[0.98] hover:bg-[#4ca9b5]"
             >
               Reservar ahora
             </Link>

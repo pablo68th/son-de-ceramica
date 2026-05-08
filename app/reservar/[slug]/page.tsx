@@ -25,7 +25,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
 
           <Link
             href="/reservar"
-            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white"
+            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
           >
             Volver a experiencias
           </Link>
@@ -73,8 +73,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
         <div className="mb-5 flex items-center justify-between">
           <Link
             href="/reservar"
-            className="rounded-full bg-white px-4 py-2 text-sm shadow-sm"
-          >
+            className="rounded-full bg-white px-4 py-2 text-sm font-medium shadow-sm transition active:scale-[0.98]"          >
             Volver
           </Link>
 
@@ -92,7 +91,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
                 Experiencia
               </p>
 
-              <h1 className="mt-2 text-3xl font-normal leading-tight tracking-[-0.03em]">
+              <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-[-0.03em]">
                 {service.name}
               </h1>
             </div>
@@ -100,7 +99,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
 
           <div className="grid grid-cols-3 gap-3 p-5">
             <div className="rounded-2xl bg-[#F7F5F2] p-4 text-center">
-              <p className="text-lg font-normal">
+              <p className="text-lg font-medium">
                 ${service.price_mxn}
               </p>
 
@@ -110,7 +109,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
             </div>
 
             <div className="rounded-2xl bg-[#F7F5F2] p-4 text-center">
-              <p className="text-lg font-normal">
+              <p className="text-lg font-medium">
                 {service.sessions_count}
               </p>
 
@@ -120,7 +119,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
             </div>
 
             <div className="rounded-2xl bg-[#F7F5F2] p-4 text-center">
-              <p className="text-lg font-normal">
+              <p className="text-lg font-medium">
                 {service.capacity}
               </p>
 
