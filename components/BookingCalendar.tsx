@@ -206,7 +206,8 @@ export default function BookingCalendar({ service, blocks }: Props) {
                         setAvailabilityError("")
                       }}
                       className={`rounded-lg border p-3 text-left ${
-                        isSelected ? "bg-black text-white" : "bg-white"
+                        isSelected  ? "border-[#59B9C6] bg-[#59B9C6] text-white"
+  : "border-gray-200 bg-white text-[#333333]"
                       }`}
                     >
                       {block.start_time} – {block.end_time}
@@ -363,8 +364,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
                       `/reservar/${service.slug}/datos?date=${firstDate}&blockId=${firstBlockId}${secondParams}`
                     )
                   }}
-                  className="mt-4 w-full rounded bg-black px-4 py-2 text-white"
-                >
+                    className="mt-4 w-full rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#4ca9b5]"                >
                   Continuar
                 </button>
               )}
