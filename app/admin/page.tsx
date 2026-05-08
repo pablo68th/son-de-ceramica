@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabaseClient"
 import { PaymentToggle } from "../../components/PaymentToggle"
+import { CancelReservationButton } from "../../components/CancelReservationButton"
 
 export default async function AdminPage() {
   const { data: sessions, error } = await supabase
@@ -105,8 +106,9 @@ export default async function AdminPage() {
                         </p>
 
                         <p className="mt-1 text-sm text-gray-600">
-                          {session.schedule_blocks.start_time.slice(0, 5)} –{" "}
-                          {session.schedule_blocks.end_time.slice(0, 5)}
+                          {session.schedule_blocks
+                            ? `${session.schedule_blocks.start_time.slice(0, 5)} – ${session.schedule_blocks.end_time.slice(0, 5)}`
+                            : "Horario no disponible"}
                         </p>
 
                         <div className="mt-3 flex flex-wrap gap-2">
@@ -120,11 +122,19 @@ export default async function AdminPage() {
                         </div>
                       </div>
 
-                      <div>
+                      <div className="flex flex-col items-start gap-2 md:items-end">
                         <PaymentToggle
                           reservationId={session.reservations.id}
                           initialStatus={session.reservations.payment_status}
                         />
+
+                        {session.status !== "cancelled" ? (
+                          <CancelReservationButton reservationId={session.reservations.id} />
+                        ) : (
+                          <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm text-red-700">
+                            Cancelada
+                          </span>
+                        )}
                       </div>
                     </div>
 
