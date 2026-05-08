@@ -35,11 +35,14 @@ export function ReservationForm({
 }: Props) {
   const isCoupleService = service.slug === "torno-en-pareja"
 
+  const [step, setStep] = useState<"form" | "review">("form")
+
   const [name, setName] = useState("")
   const [lastName, setLastName] = useState("")
   const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
   const [peopleCount, setPeopleCount] = useState(isCoupleService ? 2 : 1)
+
   const [acceptPrivacy, setAcceptPrivacy] = useState(false)
   const [acceptPromos, setAcceptPromos] = useState(false)
 
@@ -47,42 +50,47 @@ export function ReservationForm({
   const [successMessage, setSuccessMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
 
-  async function handleSubmit() {
-    setErrorMessage("")
-    setSuccessMessage("")
-
+  function validateForm() {
     const cleanPhone = onlyDigits(phone)
 
     if (!name.trim() || !lastName.trim() || !cleanPhone || !email.trim()) {
       setErrorMessage("Completa todos los campos obligatorios.")
-      return
+      return false
     }
 
     if (cleanPhone.length !== 10) {
       setErrorMessage("Ingresa un teléfono válido de 10 dígitos.")
-      return
+      return false
     }
 
     if (!isValidEmail(email)) {
       setErrorMessage("Ingresa un correo electrónico válido.")
-      return
+      return false
     }
 
     if (!acceptPrivacy) {
       setErrorMessage("Debes aceptar el aviso de privacidad para reservar.")
-      return
+      return false
     }
+
+    return true
+  }
+
+  async function handleSubmit() {
+    setErrorMessage("")
+
+    const cleanPhone = onlyDigits(phone)
 
     try {
       setIsSubmitting(true)
 
       await createReservation({
         serviceId: service.id,
-        startDate: date,
-        secondDayDate: secondDate,
-        blockId,
-        secondBlockId,
+        startDate: "",
+        blockId: "",
         peopleCount,
+        secondDayDate: undefined,
+        secondBlockId: undefined,
         name: name.trim(),
         lastName: lastName.trim(),
         phone: cleanPhone,
@@ -108,7 +116,11 @@ export function ReservationForm({
           ♡
         </div>
 
-        <h2 className="mt-5 text-3xl font-semibold tracking-[-0.03em]">
+        <p className="mt-5 text-xs uppercase tracking-[0.24em] text-[#59B9C6]">
+          Último paso
+        </p>
+
+        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">
           Reserva confirmada
         </h2>
 
@@ -126,6 +138,89 @@ export function ReservationForm({
         >
           Volver al inicio
         </a>
+      </div>
+    )
+  }
+
+  if (step === "review") {
+    return (
+      <div className="mt-6 rounded-[2rem] bg-[#F7F5F2] p-5">
+        <p className="text-xs uppercase tracking-[0.24em] text-[#59B9C6]">
+          Último paso
+        </p>
+
+        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">
+          Revisa tu información
+        </h2>
+
+        <div className="mt-6 space-y-4 rounded-2xl bg-white p-5">
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
+              Nombre
+            </p>
+
+            <p className="mt-1 text-base font-medium">
+              {name} {lastName}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
+              Teléfono
+            </p>
+
+            <p className="mt-1 text-base font-medium">
+              {phone}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
+              Correo electrónico
+            </p>
+
+            <p className="mt-1 text-base font-medium">
+              {email}
+            </p>
+          </div>
+
+          {!isCoupleService && (
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
+                Personas
+              </p>
+
+              <p className="mt-1 text-base font-medium">
+                {peopleCount}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {errorMessage && (
+          <p className="mt-4 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
+            {errorMessage}
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="mt-5 w-full rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5] disabled:opacity-50"
+        >
+          {isSubmitting
+            ? "Confirmando reserva..."
+            : "Confirmar reserva"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStep("form")}
+          className="mt-3 w-full rounded-2xl border border-gray-200 bg-white px-5 py-4 text-base font-medium text-[#333333] transition active:scale-[0.98]"
+        >
+          Editar información
+        </button>
       </div>
     )
   }
@@ -221,13 +316,16 @@ export function ReservationForm({
 
       <button
         type="button"
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-        className="mt-2 rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5] disabled:opacity-50"
+        onClick={() => {
+          setErrorMessage("")
+
+          if (!validateForm()) return
+
+          setStep("review")
+        }}
+        className="mt-2 rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
       >
-        isSubmitting
-  ? "Confirmando reserva..."
-  : "Confirmar reserva"
+        Revisar reserva
       </button>
     </div>
   )
