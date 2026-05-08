@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { supabase } from "../../../lib/supabaseClient"
 import BookingCalendar from "../../../components/BookingCalendar"
 
@@ -18,8 +19,17 @@ export default async function ServiceReservationPage({ params }: PageProps) {
 
   if (error || !service) {
     return (
-      <main className="p-6">
-        <h1>Servicio no encontrado</h1>
+      <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#333333]">
+        <section className="mx-auto max-w-md rounded-[2rem] bg-white p-6 shadow-sm">
+          <h1 className="text-2xl font-light">Servicio no encontrado</h1>
+
+          <Link
+            href="/reservar"
+            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white"
+          >
+            Volver a experiencias
+          </Link>
+        </section>
       </main>
     )
   }
@@ -58,34 +68,79 @@ export default async function ServiceReservationPage({ params }: PageProps) {
   }
 
   return (
-    <main className="p-6">
-      <a href="/reservar" className="text-sm underline mb-4 inline-block">
-        Volver a servicios
-      </a>
+    <main className="min-h-screen bg-[#F7F5F2] px-4 py-6 text-[#333333]">
+      <section className="mx-auto max-w-md">
+        <div className="mb-5 flex items-center justify-between">
+          <Link
+            href="/reservar"
+            className="rounded-full bg-white px-4 py-2 text-sm shadow-sm"
+          >
+            Volver
+          </Link>
 
-      <section className="mt-6 rounded-xl border p-4">
-        <h1 className="text-2xl font-semibold">{service.name}</h1>
+          <p className="text-xs uppercase tracking-[0.22em] text-[#59B9C6]">
+            Reserva
+          </p>
+        </div>
 
-        <p className="mt-2 text-gray-600">
-          ${service.price_mxn} MXN
-        </p>
+        <section className="overflow-hidden rounded-[2rem] bg-white shadow-sm">
+          <div className="relative h-44 bg-gradient-to-br from-[#DCCEC4] via-[#F2D9DC] to-[#59B9C6]/50">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.38),transparent_32%)]" />
 
-        <p className="mt-2 text-gray-600">
-          Sesiones: {service.sessions_count}
-        </p>
+            <div className="absolute bottom-5 left-5 right-5">
+              <p className="text-xs uppercase tracking-[0.25em] text-[#333333]/60">
+                Experiencia
+              </p>
 
-        <p className="mt-2 text-gray-600">
-          Cupo por horario: {service.capacity}
-        </p>
-      </section>
+              <h1 className="mt-2 text-3xl font-light leading-tight tracking-[-0.03em]">
+                {service.name}
+              </h1>
+            </div>
+          </div>
 
-      {blocks.length > 0 ? (
-        <BookingCalendar service={service} blocks={blocks} />
-      ) : (
-        <section className="mt-6 rounded-xl border p-4">
-          <p>No hay horarios disponibles para este servicio.</p>
+          <div className="grid grid-cols-3 gap-3 p-5">
+            <div className="rounded-2xl bg-[#F7F5F2] p-4 text-center">
+              <p className="text-lg font-light">
+                ${service.price_mxn}
+              </p>
+
+              <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#333333]/55">
+                MXN
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-[#F7F5F2] p-4 text-center">
+              <p className="text-lg font-light">
+                {service.sessions_count}
+              </p>
+
+              <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#333333]/55">
+                sesiones
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-[#F7F5F2] p-4 text-center">
+              <p className="text-lg font-light">
+                {service.capacity}
+              </p>
+
+              <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#333333]/55">
+                cupo
+              </p>
+            </div>
+          </div>
         </section>
-      )}
+
+        {blocks.length > 0 ? (
+          <BookingCalendar service={service} blocks={blocks} />
+        ) : (
+          <section className="mt-6 rounded-[2rem] bg-white p-6 shadow-sm">
+            <p className="text-sm text-[#333333]/65">
+              No hay horarios disponibles para esta experiencia.
+            </p>
+          </section>
+        )}
+      </section>
     </main>
   )
 }
