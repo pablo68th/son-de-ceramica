@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { supabase } from "../../../../lib/supabaseClient"
 import { ReservationForm } from "../../../../components/ReservationForm"
 
@@ -13,6 +14,16 @@ type PageProps = {
   }>
 }
 
+function formatDate(dateString: string) {
+  const date = new Date(`${dateString}T12:00:00`)
+
+  return date.toLocaleDateString("es-MX", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  })
+}
+
 export default async function DatosPage({
   params,
   searchParams,
@@ -22,8 +33,19 @@ export default async function DatosPage({
 
   if (!date || !blockId) {
     return (
-      <main className="p-6">
-        <h1>Error: falta información de la reserva</h1>
+      <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#333333]">
+        <section className="mx-auto max-w-md rounded-[2rem] bg-white p-6 shadow-sm">
+          <h1 className="text-2xl font-light">
+            Falta información de la reserva
+          </h1>
+
+          <Link
+            href={`/reservar/${slug}`}
+            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white"
+          >
+            Volver a elegir horario
+          </Link>
+        </section>
       </main>
     )
   }
@@ -51,46 +73,109 @@ export default async function DatosPage({
 
   if (serviceError || blockError || !service || !block) {
     return (
-      <main className="p-6">
-        <h1>Error cargando la información de la reserva</h1>
+      <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#333333]">
+        <section className="mx-auto max-w-md rounded-[2rem] bg-white p-6 shadow-sm">
+          <h1 className="text-2xl font-light">
+            Error cargando la información de la reserva
+          </h1>
+
+          <Link
+            href="/reservar"
+            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white"
+          >
+            Volver a experiencias
+          </Link>
+        </section>
       </main>
     )
   }
 
   return (
-    <main className="p-6">
-      <a href={`/reservar/${slug}`} className="text-sm underline">
-        Volver
-      </a>
+    <main className="min-h-screen bg-[#F7F5F2] px-4 py-6 text-[#333333]">
+      <section className="mx-auto max-w-md">
+        <div className="mb-5 flex items-center justify-between">
+          <Link
+            href={`/reservar/${slug}`}
+            className="rounded-full bg-white px-4 py-2 text-sm shadow-sm"
+          >
+            Volver
+          </Link>
 
-      <section className="mt-6 rounded-xl border p-4">
-        <h1 className="text-xl font-semibold">Completa tu reserva</h1>
-
-        <div className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
-          <p>{service.name}</p>
-          <p>Primer día: {date}</p>
-          <p>
-            Horario: {block.start_time} – {block.end_time}
+          <p className="text-xs uppercase tracking-[0.22em] text-[#59B9C6]">
+            Confirmación
           </p>
-
-          {secondDate && secondBlock && (
-            <>
-              <p className="mt-2">Segundo día: {secondDate}</p>
-              <p>
-                Horario: {secondBlock.start_time} – {secondBlock.end_time}
-              </p>
-            </>
-          )}
         </div>
 
-        <ReservationForm
-          service={service}
-          date={date}
-          blockId={blockId}
-          secondDate={secondDate}
-          secondBlockId={secondBlockId}
-        />
+        <section className="overflow-hidden rounded-[2rem] bg-white shadow-sm">
+          <div className="relative bg-gradient-to-br from-[#DCCEC4] via-[#F2D9DC] to-[#59B9C6]/40 p-6">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.35),transparent_34%)]" />
+
+            <div className="relative">
+              <p className="text-xs uppercase tracking-[0.25em] text-[#333333]/60">
+                Último paso
+              </p>
+
+              <h1 className="mt-3 text-3xl font-light leading-tight tracking-[-0.03em]">
+                Completa tu reserva
+              </h1>
+
+              <p className="mt-3 text-sm leading-6 text-[#333333]/65">
+                Revisa los detalles y déjanos tus datos para apartar tu lugar.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-5">
+            <div className="rounded-[1.5rem] bg-[#F7F5F2] p-5 text-sm text-[#333333]/70">
+              <p className="text-base font-medium text-[#333333]">
+                {service.name}
+              </p>
+
+              <div className="mt-4 space-y-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
+                    Primer día
+                  </p>
+
+                  <p className="mt-1">
+                    {formatDate(date)}
+                  </p>
+
+                  <p className="mt-1">
+                    {block.start_time.slice(0, 5)} – {block.end_time.slice(0, 5)}
+                  </p>
+                </div>
+
+                {secondDate && secondBlock && (
+                  <div className="border-t border-white pt-3">
+                    <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
+                      Segundo día
+                    </p>
+
+                    <p className="mt-1">
+                      {formatDate(secondDate)}
+                    </p>
+
+                    <p className="mt-1">
+                      {secondBlock.start_time.slice(0, 5)} –{" "}
+                      {secondBlock.end_time.slice(0, 5)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <ReservationForm
+              service={service}
+              date={date}
+              blockId={blockId}
+              secondDate={secondDate}
+              secondBlockId={secondBlockId}
+            />
+          </div>
+        </section>
       </section>
     </main>
   )
 }
+
