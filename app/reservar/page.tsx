@@ -2,14 +2,14 @@ import Link from "next/link"
 import { supabase } from "../../lib/supabaseClient"
 
 const serviceOrder = [
-  "Manos a tu obra",
-  "Tus primeras vueltas",
-  "Pequeños ceramistas",
-  "Torno a su tiempo",
-  "A tu tiempo y a tu forma",
-  "Piezas de Sábado por la Mañana",
-  "Tornear es mejor a tu lado",
-  "Celebrando entre piezas",
+  "clases-de-torno-4",
+  "construccion-manual-4",
+  "ceramica-para-ninos",
+  "sesiones-sabatinas",
+  "clases-de-torno-8",
+  "construccion-manual-8",
+  "torno-en-pareja",
+  "evento-de-temporada",
 ]
 
 const serviceCopy: Record<
@@ -21,60 +21,67 @@ const serviceCopy: Record<
     group: "clases" | "experiencias"
   }
 > = {
-  "Manos a tu obra": {
+  "construccion-manual-4": {
     label: "Construcción manual · 4 sesiones",
     title: "Manos a tu obra",
     description:
       "Una introducción tranquila para crear piezas con tus manos, explorar formas y disfrutar el proceso sin prisa.",
     group: "clases",
   },
-  "Tus primeras vueltas": {
+
+  "clases-de-torno-4": {
     label: "Torno · 4 sesiones",
     title: "Tus primeras vueltas",
     description:
       "Aprende las bases del torno alfarero en sesiones guiadas, pensadas para empezar desde cero.",
     group: "clases",
   },
-  "Pequeños ceramistas": {
-    label: "Cerámica para niñ@s",
+
+  "ceramica-para-ninos": {
+    label: "Cerámica para niñ@s · mensualidad",
     title: "Pequeños ceramistas",
     description:
       "Un espacio creativo para que niñas y niños exploren el barro, la imaginación y el trabajo con las manos.",
     group: "clases",
   },
-  "Torno a su tiempo": {
+
+  "clases-de-torno-8": {
     label: "Torno · 8 sesiones",
     title: "Torno a su tiempo",
     description:
       "Un proceso más completo para practicar, mejorar y desarrollar piezas con mayor intención.",
     group: "clases",
   },
-  "A tu tiempo y a tu forma": {
+
+  "construccion-manual-8": {
     label: "Construcción manual · 8 sesiones",
     title: "A tu tiempo y a tu forma",
     description:
       "Un recorrido más amplio para crear con calma, probar técnicas y construir piezas personales.",
     group: "clases",
   },
-  "Piezas de Sábado por la Mañana": {
+
+  "sesiones-sabatinas": {
     label: "Sesiones sabatinas",
     title: "Piezas de Sábado por la Mañana",
     description:
       "Una pausa creativa de fin de semana para conectar con el barro y salir de la rutina.",
     group: "clases",
   },
-  "Tornear es mejor a tu lado": {
+
+  "torno-en-pareja": {
     label: "Torno en pareja",
     title: "Tornear es mejor a tu lado",
     description:
       "Una experiencia para desconectarse, crear y compartir entre dos. Incluye materiales, esmalte y quema de piezas.",
     group: "experiencias",
   },
-  "Celebrando entre piezas": {
-    label: "Eventos especiales",
-    title: "Celebrando entre piezas",
+
+  "evento-de-temporada": {
+    label: "Evento temporal",
+    title: "Eventos de temporada",
     description:
-      "Una celebración íntima y creativa alrededor del barro, ideal para grupos, cumpleaños o momentos especiales.",
+      "Talleres, dinámicas y experiencias especiales por temporadas, festividades o invitados especiales.",
     group: "experiencias",
   },
 }
@@ -84,13 +91,13 @@ function normalizeName(name: string) {
 }
 
 function getServicePresentation(service: any) {
-  const direct = serviceCopy[service.name]
+const direct = serviceCopy[service.slug]
 
-  if (direct) return direct
+if (direct) return direct
 
-  const match = Object.entries(serviceCopy).find(([key]) =>
-    normalizeName(service.name).includes(normalizeName(key))
-  )
+const match = Object.entries(serviceCopy).find(([key]) =>
+  normalizeName(service.slug).includes(normalizeName(key))
+)
 
   return (
     match?.[1] ?? {
@@ -105,11 +112,8 @@ function getServicePresentation(service: any) {
 
 function sortServices(services: any[]) {
   return [...services].sort((a, b) => {
-    const aPresentation = getServicePresentation(a)
-    const bPresentation = getServicePresentation(b)
-
-    const aIndex = serviceOrder.indexOf(aPresentation.title)
-    const bIndex = serviceOrder.indexOf(bPresentation.title)
+    const aIndex = serviceOrder.indexOf(a.slug)
+    const bIndex = serviceOrder.indexOf(b.slug)
 
     if (aIndex === -1 && bIndex === -1) return 0
     if (aIndex === -1) return 1
@@ -151,7 +155,7 @@ function ServiceCard({ service }: { service: any }) {
         </div>
 
         <div className="absolute bottom-5 left-5 right-5">
-          <p className="text-xs uppercase tracking-[0.25em] text-[#333333]/55">
+          <p className="inline-flex rounded-full bg-white/75 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#333333]/80 backdrop-blur">
             {presentation.label}
           </p>
 
@@ -187,8 +191,8 @@ function ServiceCard({ service }: { service: any }) {
           href={`/reservar/${service.slug}`}
           className={`block rounded-2xl px-5 py-4 text-center text-sm font-semibold transition active:scale-[0.98] ${
             isExperience
-              ? "bg-[#333333] text-white hover:bg-[#222222]"
-              : "bg-[#59B9C6] text-white hover:bg-[#4ca9b5]"
+              ? "bg-[#333333] !text-white hover:bg-[#222222]"
+              : "bg-[#59B9C6] !text-white hover:bg-[#4ca9b5]"
           }`}
         >
           {isExperience ? "Ver experiencia" : "Ver horarios"}
@@ -287,7 +291,7 @@ const secondaryClasses = classes.filter(
 
                 <a
                   href="#experiencias"
-                  className="rounded-2xl bg-[#F7F5F2] px-6 py-4 text-center text-sm font-semibold transition active:scale-[0.98]"
+                  className="rounded-2xl bg-[#333333] px-6 py-4 text-center text-sm font-semibold !text-white transition hover:bg-[#2a2a2a] active:scale-[0.98]"
                 >
                   Ver experiencias
                 </a>
@@ -401,7 +405,7 @@ const secondaryClasses = classes.filter(
           </div>
         </section>
 
-        <section className="mt-20 rounded-[2.5rem] bg-[#333333] p-7 text-white sm:p-10">
+      <section className="mt-20 rounded-[2.5rem] bg-white p-7 text-[#333333] shadow-sm ring-1 ring-black/5 sm:p-10">
           <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-[#59B9C6]">
@@ -422,10 +426,10 @@ const secondaryClasses = classes.filter(
                 "La entrega no es inmediata.",
                 "Tu lugar se confirma al completar la reserva.",
               ].map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl bg-white/10 p-4 text-sm leading-6 text-white/80"
-                >
+                  <div
+                    key={item}
+                    className="rounded-2xl bg-[#F7F5F2] p-4 text-sm font-medium leading-6 text-[#333333]/75"
+                  >
                   {item}
                 </div>
               ))}

@@ -53,8 +53,8 @@ export function ReservationForm({
   function validateForm() {
     const cleanPhone = onlyDigits(phone)
 
-    if (!name.trim() || !lastName.trim() || !cleanPhone || !email.trim()) {
-      setErrorMessage("Completa todos los campos obligatorios.")
+    if (!name.trim() || !lastName.trim() || !cleanPhone) {
+      setErrorMessage("Completa nombre, apellido y teléfono.")
       return false
     }
 
@@ -63,7 +63,7 @@ export function ReservationForm({
       return false
     }
 
-    if (!isValidEmail(email)) {
+    if (email.trim() && !isValidEmail(email)) {
       setErrorMessage("Ingresa un correo electrónico válido.")
       return false
     }
@@ -98,7 +98,7 @@ export function ReservationForm({
     })
 
 setSuccessMessage(
-  "Recibimos tu solicitud. Tu lugar se aparta cuando se registre el anticipo del 50%."
+  "Recibimos tu solicitud. Tu lugar se aparta cuando se registre un anticipo mínimo del 50%. El resto se liquida antes de iniciar la sesión."
 )
     } catch (error) {
       setErrorMessage(
@@ -266,7 +266,7 @@ setSuccessMessage(
       <input
         value={email}
         onChange={(event) => setEmail(event.target.value)}
-        placeholder="Correo electrónico"
+        placeholder="Correo electrónico (opcional)"
         type="email"
         className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base outline-none transition focus:border-[#59B9C6] focus:ring-2 focus:ring-[#59B9C6]/10"
       />
@@ -325,6 +325,10 @@ setSuccessMessage(
           {errorMessage}
         </p>
       )}
+
+      <div className="rounded-2xl bg-[#F7F5F2] p-4 text-sm leading-6 text-[#333333]/70">
+        Tu solicitud no aparta el cupo todavía. Para confirmar tu lugar, deberás cubrir al menos el 50% de anticipo. El resto se liquida antes de iniciar la sesión.
+      </div>
 
       <button
         type="button"
