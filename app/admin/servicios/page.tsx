@@ -1,8 +1,29 @@
 import Link from "next/link"
-import { supabase } from "../../../lib/supabaseClient"
+import { redirect } from "next/navigation"
+import { createSupabaseServerClient } from "../../../lib/supabaseServer"
 import { AdminServicesList } from "../../../components/AdminServicesList"
 
 export default async function AdminServicesPage() {
+  const supabase = await createSupabaseServerClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect("/admin/login")
+  }
+
+  const { data: adminUser } = await supabase
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .single()
+
+  if (!adminUser) {
+    redirect("/admin/login")
+  }
+
   const { data: services, error } = await supabase
     .from("services")
     .select(
@@ -53,3 +74,4 @@ export default async function AdminServicesPage() {
     </main>
   )
 }
+

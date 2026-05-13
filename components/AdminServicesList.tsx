@@ -25,24 +25,29 @@ export function AdminServicesList({ services }: Props) {
   const [items, setItems] = useState(services)
   const [savingId, setSavingId] = useState<string | null>(null)
 
-  async function updateService(serviceId: string, updates: Partial<Service>) {
-    setSavingId(serviceId)
+async function updateService(serviceId: string, updates: Partial<Service>) {
+  setSavingId(serviceId)
 
-    const { error } = await supabase
-      .from("services")
-      .update(updates)
-      .eq("id", serviceId)
+  const { error } = await supabase
+    .from("services")
+    .update(updates)
+    .eq("id", serviceId)
 
-    if (!error) {
-      setItems((current) =>
-        current.map((item) =>
-          item.id === serviceId ? { ...item, ...updates } : item
-        )
-      )
-    }
-
+  if (error) {
+    console.error("Error actualizando servicio:", error)
+    alert(`No se pudo guardar: ${error.message}`)
     setSavingId(null)
+    return
   }
+
+  setItems((current) =>
+    current.map((item) =>
+      item.id === serviceId ? { ...item, ...updates } : item
+    )
+  )
+
+  setSavingId(null)
+}
 
   return (
     <section className="mt-8 rounded-3xl bg-white p-6 shadow-sm">
