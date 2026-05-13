@@ -9,6 +9,7 @@ const serviceOrder = [
   "clases-de-torno-8",
   "construccion-manual-8",
   "torno-en-pareja",
+  "celebraciones-especiales",
   "evento-de-temporada",
 ]
 
@@ -76,6 +77,14 @@ const serviceCopy: Record<
       "Una experiencia para desconectarse, crear y compartir entre dos. Incluye materiales, esmalte y quema de piezas.",
     group: "experiencias",
   },
+
+  "celebraciones-especiales": {
+  label: "Celebraciones privadas",
+  title: "Celebrando entre piezas",
+  description:
+    "Cumpleaños, aniversarios, propuestas, coworkings o reuniones especiales con una experiencia de cerámica personalizada para tu grupo.",
+  group: "experiencias",
+},
 
   "evento-de-temporada": {
     label: "Evento temporal",
@@ -172,13 +181,27 @@ function ServiceCard({ service }: { service: any }) {
 
         <div className="flex items-end justify-between gap-4 border-t border-[#333333]/10 pt-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-[#333333]/45">
-              Desde
-            </p>
+            {service.slug === "celebraciones-especiales" ? (
+              <>
+                <p className="text-xs uppercase tracking-[0.22em] text-[#333333]/45">
+                  Eventos privados
+                </p>
 
-            <p className="mt-1 text-xl font-medium tracking-[-0.03em]">
-              ${service.price_mxn} MXN
-            </p>
+                <p className="mt-1 text-xl font-medium tracking-[-0.03em]">
+                  Cotiza tu evento
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-xs uppercase tracking-[0.22em] text-[#333333]/45">
+                  Costo
+                </p>
+
+                <p className="mt-1 text-xl font-medium tracking-[-0.03em]">
+                  ${service.price_mxn} MXN
+                </p>
+              </>
+            )}
           </div>
 
           <div className="rounded-full bg-[#F7F5F2] px-3 py-2 text-xs text-[#333333]/60">

@@ -100,7 +100,9 @@ export default async function ServiceReservationPage({ params }: PageProps) {
           <div className="grid grid-cols-3 gap-3 p-5">
             <div className="rounded-2xl bg-[#F7F5F2] p-4 text-center">
               <p className="text-lg font-medium">
-                ${service.price_mxn}
+                {service.slug === "celebraciones-especiales"
+                  ? "Cotización personalizada"
+                  : `$${service.price_mxn}`}
               </p>
 
               <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#333333]/55">

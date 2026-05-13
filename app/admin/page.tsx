@@ -31,7 +31,7 @@ export default async function AdminPage() {
     return (
       <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#1F1F1F]">
         <section className="mx-auto max-w-5xl rounded-2xl bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-light">Error cargando reservas</h1>
+          <h1 className="text-2xl font-light">Error cargando reservaciones </h1>
           <p className="mt-2 text-sm text-red-600">{error.message}</p>
         </section>
       </main>
@@ -51,12 +51,19 @@ export default async function AdminPage() {
           </p>
 
           <h1 className="mt-2 text-3xl font-light">
-            Reservas
+            Reservaciones
           </h1>
 
           <p className="mt-2 text-gray-600">
-            Revisa las reservas registradas, datos de contacto, estado de pago y estado de la reserva.
+            Revisa las reservaciones registradas, datos de contacto, estado de pago y estado de la reserva.
           </p>
+
+          <a
+            href="/admin/servicios"
+            className="mt-5 inline-block rounded-2xl bg-[#59B9C6] px-5 py-3 text-sm font-semibold !text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
+          >
+            Editar servicios
+          </a>
         </div>
 
         <AdminReservationsList sessions={sessions ?? []} />
@@ -64,4 +71,6 @@ export default async function AdminPage() {
     </main>
   )
 }
+
+
 
