@@ -8,28 +8,101 @@ type Props = {
   sessions: any[]
 }
 
-export function AdminReservationsList({ sessions }: Props) {
+function formatDate(date: string) {
+  return new Date(date + "T00:00:00").toLocaleDateString(
+    "es-MX",
+    {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
+  )
+}
+
+function formatTime(session: any) {
+  if (!session.schedule_blocks) {
+    return "Horario no disponible"
+  }
+
+  return `${session.schedule_blocks.start_time.slice(
+    0,
+    5
+  )} – ${session.schedule_blocks.end_time.slice(0, 5)}`
+}
+
+function getReservation(session: any) {
+  return Array.isArray(session.reservations)
+    ? session.reservations[0]
+    : session.reservations
+}
+
+function getService(session: any) {
+  return Array.isArray(session.services)
+    ? session.services[0]
+    : session.services
+}
+
+export function AdminReservationsList({
+  sessions,
+}: Props) {
   const [filter, setFilter] = useState("active")
 
-  const filteredSessions = sessions.filter((session) => {
-    if (filter === "all") return true
-    if (filter === "cancelled") return session.status === "cancelled"
-    return session.status !== "cancelled"
+  const groupedByReservation = sessions.reduce(
+    (groups: any, session: any) => {
+      const reservation = getReservation(session)
+
+      if (!reservation?.id) {
+        return groups
+      }
+
+      if (!groups[reservation.id]) {
+        groups[reservation.id] = {
+          reservation,
+          service: getService(session),
+          sessions: [],
+        }
+      }
+
+      groups[reservation.id].sessions.push(session)
+
+      return groups
+    },
+    {}
+  )
+
+  const reservations = Object.values(
+    groupedByReservation
+  ).map((item: any) => {
+    const sortedSessions = item.sessions.sort(
+      (a: any, b: any) =>
+        String(a.session_date).localeCompare(
+          String(b.session_date)
+        )
+    )
+
+    const isCancelled = sortedSessions.every(
+      (session: any) =>
+        session.status === "cancelled"
+    )
+
+    return {
+      ...item,
+      sessions: sortedSessions,
+      isCancelled,
+    }
   })
 
-  const groupedSessions = filteredSessions.reduce((groups: any, session: any) => {
-    const date = session.session_date || "Sin fecha"
+  const filteredReservations =
+    reservations.filter((item: any) => {
+      if (filter === "all") return true
 
-    if (!groups[date]) {
-      groups[date] = []
-    }
+      if (filter === "cancelled") {
+        return item.isCancelled
+      }
 
-    groups[date].push(session)
-
-    return groups
-  }, {})
-
-  const groupedEntries = Object.entries(groupedSessions)
+      return !item.isCancelled
+    })
 
   return (
     <>
@@ -71,92 +144,132 @@ export function AdminReservationsList({ sessions }: Props) {
         </button>
       </div>
 
-      <div className="mt-8 space-y-8">
-        {groupedEntries.map(([date, dateSessions]: any) => (
-          <section key={date}>
-            <h2 className="mb-3 text-xl font-semibold tracking-[-0.03em] text-[#1F1F1F]">
-              {date === "Sin fecha"
-                ? "Sin fecha"
-                : new Date(date + "T00:00:00").toLocaleDateString("es-MX", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-            </h2>
+      <div className="mt-8 grid gap-4">
+        {filteredReservations.map((item: any) => {
+          const reservation = item.reservation
 
-            <div className="grid gap-4">
-              {dateSessions.map((session: any) => (
-                <article
-                  key={session.id}
-                  className={`rounded-3xl bg-white p-5 shadow-sm ${
-                    session.status === "cancelled"
-  ? "border border-red-100 bg-red-50/40"
-  : ""
-                  }`}
-                >
-                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold tracking-[-0.02em]">
-                        {session.reservations.customer_name}{" "}
-                        {session.reservations.customer_last_name}
-                      </h3>
+          const firstSession = item.sessions[0]
 
-                      <p className="mt-1 text-sm text-gray-600">
-                        {session.services.name}
-                      </p>
+          const service = item.service
 
-                      <p className="mt-1 text-sm text-gray-600">
-                        {session.schedule_blocks
-                          ? `${session.schedule_blocks.start_time.slice(0, 5)} – ${session.schedule_blocks.end_time.slice(0, 5)}`
-                          : "Horario no disponible"}
-                      </p>
+          return (
+            <article
+              key={reservation.id}
+              className={`rounded-3xl bg-white p-5 shadow-sm ${
+                item.isCancelled
+                  ? "border border-red-100 bg-red-50/40"
+                  : ""
+              }`}
+            >
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-[#59B9C6]">
+                    {firstSession?.session_date
+                      ? `Inicia: ${formatDate(
+                          firstSession.session_date
+                        )}`
+                      : "Sin fecha"}
+                  </p>
 
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
-                          Personas: {session.people_count}
-                        </span>
+                  <h3 className="mt-2 text-lg font-semibold tracking-[-0.02em]">
+                    {reservation.customer_name}{" "}
+                    {
+                      reservation.customer_last_name
+                    }
+                  </h3>
 
-                        <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
-                          Estado:{" "}
-                          {session.status === "cancelled" ? "Cancelada" : "Activa"}
-                        </span>
-                      </div>
-                    </div>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {service?.name ??
+                      "Servicio no disponible"}
+                  </p>
 
-                    <div className="flex flex-col items-start gap-2 md:items-end">
-                      <PaymentToggle
-                        reservationId={session.reservations.id}
-                        initialStatus={session.reservations.payment_status}
-                      />
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
+                      Personas:{" "}
+                      {firstSession?.people_count ??
+                        "-"}
+                    </span>
 
-                      {session.status !== "cancelled" ? (
-                        <CancelReservationButton reservationId={session.reservations.id} />
-                      ) : (
-                        <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm text-red-700">
-                          Cancelada
-                        </span>
-                      )}
-                    </div>
+                    <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
+                      Sesiones:{" "}
+                      {item.sessions.length}
+                    </span>
+
+                    <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
+                      Estado:{" "}
+                      {item.isCancelled
+                        ? "Cancelada"
+                        : "Activa"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-start gap-2 md:items-end">
+                  <PaymentToggle
+                    reservationId={reservation.id}
+                    initialStatus={
+                      reservation.payment_status ??
+                      "pending"
+                    }
+                  />
+
+                  {!item.isCancelled ? (
+                    <CancelReservationButton
+                      reservationId={
+                        reservation.id
+                      }
+                    />
+                  ) : (
+                    <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm text-red-700">
+                      Cancelada
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <details className="mt-4 border-t border-gray-100 pt-4">
+                <summary className="cursor-pointer list-none text-sm font-medium text-[#59B9C6]">
+                  Ver sesiones y contacto
+                </summary>
+
+                <div className="mt-4 grid gap-4 text-sm text-gray-600">
+                  <div>
+                    <p>
+                      Tel: {reservation.phone}
+                    </p>
+
+                    <p>
+                      Correo: {reservation.email}
+                    </p>
                   </div>
 
-                    <details className="mt-4 border-t border-gray-100 pt-4">
-                      <summary className="cursor-pointer list-none text-sm font-medium text-[#59B9C6]">
-                        Ver detalles
-                      </summary>
+                  <div className="rounded-2xl bg-[#F7F5F2] p-4">
+                    <p className="font-medium text-[#1F1F1F]">
+                      Sesiones de esta reservación
+                    </p>
 
-                      <div className="mt-3 text-sm text-gray-600">
-                        <p>Tel: {session.reservations.phone}</p>
-                        <p>Correo: {session.reservations.email}</p>
-                      </div>
-                    </details>
-                </article>
-              ))}
-            </div>
-          </section>
-        ))}
+                    <ul className="mt-3 space-y-2">
+                      {item.sessions.map(
+                        (session: any) => (
+                          <li key={session.id}>
+                            •{" "}
+                            {formatDate(
+                              session.session_date
+                            )}{" "}
+                            ·{" "}
+                            {formatTime(session)}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </details>
+            </article>
+          )
+        })}
 
-        {filteredSessions.length === 0 && (
+        {filteredReservations.length === 0 && (
           <div className="rounded-3xl bg-white p-6 text-center shadow-sm">
             No hay reservas para este filtro.
           </div>
