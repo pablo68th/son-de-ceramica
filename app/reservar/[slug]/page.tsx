@@ -124,7 +124,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
               </p>
 
               <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#333333]/55">
-                cupo
+                cupo máx.
               </p>
             </div>
           </div>

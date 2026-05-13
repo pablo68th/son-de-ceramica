@@ -3,7 +3,10 @@
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { generateSessionPlan } from "../lib/sessionGenerator"
-import { validateSessionPlanAvailability } from "../lib/availability"
+import {
+  getAvailability,
+  validateSessionPlanAvailability,
+} from "../lib/availability"
 
 type Service = {
   id: string
@@ -78,6 +81,11 @@ export default function BookingCalendar({ service, blocks }: Props) {
   const [secondBlockId, setSecondBlockId] = useState<string | null>(null)
 
   const [availabilityError, setAvailabilityError] = useState("")
+
+  const [availabilityInfo, setAvailabilityInfo] = useState<{
+    remaining: number
+    message: string
+  } | null>(null)
 
   const today = getTodayDate()
   const maxBookingDate = getMaxBookingDate()
@@ -201,10 +209,22 @@ export default function BookingCalendar({ service, blocks }: Props) {
                     <button
                       key={block.id}
                       type="button"
-                      onClick={() => {
-                        setFirstBlockId(block.id)
-                        setAvailabilityError("")
-                      }}
+                        onClick={async () => {
+                          setFirstBlockId(block.id)
+                          setAvailabilityError("")
+                          setAvailabilityInfo(null)
+
+                          const availability = await getAvailability(
+                            service.id,
+                            firstDate,
+                            block.id
+                          )
+
+                          setAvailabilityInfo({
+                            remaining: availability.remaining,
+                            message: availability.message,
+                          })
+                        }}
                       className={`rounded-lg border p-3 text-left ${
                         isSelected  ? "border-[#59B9C6] bg-[#59B9C6] text-white"
   : "border-gray-200 bg-white text-[#333333]"
@@ -300,6 +320,23 @@ export default function BookingCalendar({ service, blocks }: Props) {
                   {firstBlock.start_time} – {firstBlock.end_time}
                 </p>
               )}
+
+                {firstDate && firstBlock && availabilityInfo && (
+                  <div className="mt-3 rounded-2xl bg-white p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
+                      Cupo disponible
+                    </p>
+
+                    <p className="mt-1 text-lg font-semibold text-[#333333]">
+                      {availabilityInfo.remaining} lugar
+                      {availabilityInfo.remaining === 1 ? "" : "es"}
+                    </p>
+
+                    <p className="mt-1 text-xs text-[#333333]/55">
+                      Disponible para ese día y horario.
+                    </p>
+                  </div>
+                )}
 
               {needsSecondDay && secondDate && secondBlock && (
                 <p className="text-sm text-gray-600">
