@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { TransitionLink } from "../components/TransitionLink"
 
 const experiences = [
   {
@@ -22,7 +22,7 @@ const experiences = [
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#F7F5F2] text-[#333333]">
-      <section className="mx-auto min-h-screen max-w-md bg-[#F7F5F2] shadow-sm md:my-8 md:overflow-hidden md:rounded-[2rem]">
+      <section className="animate-soft-enter mx-auto min-h-screen max-w-md bg-[#F7F5F2] shadow-sm md:my-8 md:overflow-hidden md:rounded-[2rem]">
         <div className="relative min-h-[520px] overflow-hidden rounded-b-[2rem] bg-[#DCCEC4]">
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.20),rgba(0,0,0,0.55))]" />
 
@@ -30,10 +30,6 @@ export default function Home() {
             <p className="text-xs uppercase tracking-[0.28em] text-white/80">
               Son de Cerámica
             </p>
-          </div>
-
-          <div className="absolute right-6 top-8 z-10 text-3xl text-white">
-            ☰
           </div>
 
           <div className="absolute bottom-24 left-6 right-6 z-10">
@@ -47,12 +43,12 @@ export default function Home() {
           </div>
 
           <div className="absolute bottom-8 left-6 right-6 z-10">
-            <Link
+            <TransitionLink
               href="/reservar"
               className="block rounded-2xl bg-[#59B9C6] px-6 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/10 transition active:scale-[0.98] hover:bg-[#4ca9b5]"
             >
               Reservar clase
-            </Link>
+            </TransitionLink>
           </div>
 
           <div className="absolute left-10 top-24 h-40 w-40 rounded-full bg-[#F2D9DC]/45 blur-2xl" />
@@ -81,12 +77,12 @@ export default function Home() {
                     {experience.name}
                   </h3>
 
-                  <Link
+                  <TransitionLink
                     href={`/reservar/${experience.slug}`}
                     className="mt-3 block rounded-xl border border-[#59B9C6] px-3 py-2 text-center text-xs font-semibold text-[#459EAA] transition active:scale-[0.98] active:bg-[#59B9C6] active:text-white"
                   >
                     Reservar
-                  </Link>
+                  </TransitionLink>
                 </div>
               </article>
             ))}
@@ -99,29 +95,29 @@ export default function Home() {
 
             <div className="mt-5 grid grid-cols-3 gap-3 text-center text-xs text-[#333333]/70">
               <div>
-                <p className="text-2xl">□</p>
+                <p className="text-2xl">✦</p>
                 <p className="mt-2">Elige tu clase</p>
               </div>
 
               <div>
-                <p className="text-2xl">○</p>
+                <p className="text-2xl">◷</p>
                 <p className="mt-2">Selecciona horario</p>
               </div>
 
               <div>
-                <p className="text-2xl">♡</p>
+                <p className="text-2xl">✓</p>
                 <p className="mt-2">Reserva tu lugar</p>
               </div>
             </div>
           </section>
 
           <div className="sticky bottom-4 mt-8">
-            <Link
+            <TransitionLink
               href="/reservar"
               className="block rounded-2xl bg-[#59B9C6] px-6 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/10 transition active:scale-[0.98] hover:bg-[#4ca9b5]"
             >
               Reservar ahora
-            </Link>
+            </TransitionLink>
           </div>
         </section>
       </section>

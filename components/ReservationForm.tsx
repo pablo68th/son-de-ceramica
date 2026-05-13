@@ -97,7 +97,9 @@ export function ReservationForm({
       email: email.trim().toLowerCase(),
     })
 
-      setSuccessMessage("Tu reserva quedó confirmada.")
+setSuccessMessage(
+  "Recibimos tu solicitud. Tu lugar se aparta cuando se registre el anticipo del 50%."
+)
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -116,12 +118,12 @@ export function ReservationForm({
           ♡
         </div>
 
-        <p className="mt-5 text-xs uppercase tracking-[0.24em] text-[#59B9C6]">
-          Experiencia reservada
+        <p className="text-xs uppercase tracking-[0.24em] text-[#59B9C6]">
+          Solicitud recibida
         </p>
 
         <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">
-          Reserva confirmada
+          Pre-reserva enviada
         </h2>
 
         <p className="mt-4 text-sm leading-7 text-[#333333]/65">
@@ -153,7 +155,7 @@ export function ReservationForm({
           Revisa tu información
         </h2>
 
-        <div className="mt-6 space-y-4 rounded-2xl bg-white p-5">
+        <div className="mt-8 space-y-5 rounded-2xl bg-white p-5">
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
               Nombre
@@ -206,7 +208,7 @@ export function ReservationForm({
           {service.name}
         </p>
       </div>
-      
+
         {errorMessage && (
           <p className="mt-4 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
             {errorMessage}
@@ -220,8 +222,8 @@ export function ReservationForm({
           className="mt-5 w-full rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5] disabled:opacity-50"
         >
           {isSubmitting
-            ? "Confirmando reserva..."
-            : "Confirmar reserva"}
+            ? "Enviando solicitud..."
+            : "Enviar solicitud"}
         </button>
 
         <button

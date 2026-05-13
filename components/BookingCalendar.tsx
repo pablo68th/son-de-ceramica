@@ -78,7 +78,6 @@ export default function BookingCalendar({ service, blocks }: Props) {
   const [secondBlockId, setSecondBlockId] = useState<string | null>(null)
 
   const [availabilityError, setAvailabilityError] = useState("")
-  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
 
   const today = getTodayDate()
   const maxBookingDate = getMaxBookingDate()
@@ -147,45 +146,15 @@ export default function BookingCalendar({ service, blocks }: Props) {
 
   function getBlockLabel(blockId: string) {
     const block = blocks.find((b) => b.id === blockId)
+
     if (!block) return ""
+
     return `${block.start_time} – ${block.end_time}`
   }
 
-  async function handleContinue() {
-    if (!firstBlockId) return
-
-    setAvailabilityError("")
-    setIsCheckingAvailability(true)
-
-    const peopleCount = service.slug === "torno-en-pareja" ? 2 : 1
-
-    const result = await validateSessionPlanAvailability({
-      serviceId: service.id,
-      sessions: sessionPlan,
-      peopleCount,
-    })
-
-    if (!result.allAvailable) {
-      setIsCheckingAvailability(false)
-      setAvailabilityError("No hay disponibilidad en todas las sesiones.")
-      return
-    }
-
-    const secondParams =
-      needsSecondDay && secondDate && secondBlockId
-        ? `&secondDate=${secondDate}&secondBlockId=${secondBlockId}`
-        : ""
-
-    router.push(
-      `/reservar/${service.slug}/datos?date=${firstDate}&blockId=${firstBlockId}${secondParams}`
-    )
-  }
-
   return (
-    <section className="mt-6 rounded-[2rem] border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
-      <h2 className="mb-4 text-2xl font-semibold tracking-[-0.03em]">
-        Elige tus días
-      </h2>
+    <section className="animate-soft-enter mt-6 rounded-[2rem] border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
+      <h2 className="text-lg font-semibold mb-4">Elige tus días</h2>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="min-w-0">
@@ -204,9 +173,8 @@ export default function BookingCalendar({ service, blocks }: Props) {
               setSecondDate("")
               setSecondBlockId(null)
               setAvailabilityError("")
-              setIsCheckingAvailability(false)
             }}
-            className="w-full min-w-0 appearance-none rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base text-[#1F1F1F]"
+            className="w-full min-w-0 appearance-none rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base text-[#1F1F1F]"
           />
 
           <p className="mt-2 text-xs text-gray-500">
@@ -236,12 +204,10 @@ export default function BookingCalendar({ service, blocks }: Props) {
                       onClick={() => {
                         setFirstBlockId(block.id)
                         setAvailabilityError("")
-                        setIsCheckingAvailability(false)
                       }}
-                      className={`rounded-2xl border p-4 text-left text-sm font-medium transition active:scale-[0.98] ${
-                        isSelected
-                          ? "border-[#59B9C6] bg-[#59B9C6] text-white"
-                          : "border-gray-200 bg-white text-[#333333]"
+                      className={`rounded-lg border p-3 text-left ${
+                        isSelected  ? "border-[#59B9C6] bg-[#59B9C6] text-white"
+  : "border-gray-200 bg-white text-[#333333]"
                       }`}
                     >
                       {block.start_time} – {block.end_time}
@@ -268,9 +234,8 @@ export default function BookingCalendar({ service, blocks }: Props) {
                   setSecondDate(e.target.value)
                   setSecondBlockId(null)
                   setAvailabilityError("")
-                  setIsCheckingAvailability(false)
                 }}
-                className="w-full min-w-0 appearance-none rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base text-[#1F1F1F] disabled:opacity-50"
+                className="w-full min-w-0 appearance-none rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base text-[#1F1F1F] disabled:opacity-50"
               />
 
               <p className="mt-2 text-xs text-gray-500">
@@ -300,12 +265,9 @@ export default function BookingCalendar({ service, blocks }: Props) {
                           onClick={() => {
                             setSecondBlockId(block.id)
                             setAvailabilityError("")
-                            setIsCheckingAvailability(false)
                           }}
-                          className={`rounded-2xl border p-4 text-left text-sm font-medium transition active:scale-[0.98] ${
-                            isSelected
-                              ? "border-[#59B9C6] bg-[#59B9C6] text-white"
-                              : "border-gray-200 bg-white text-[#333333]"
+                          className={`rounded-lg border p-3 text-left ${
+                            isSelected ? "bg-black text-white" : "bg-white"
                           }`}
                         >
                           {block.start_time} – {block.end_time}
@@ -328,9 +290,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
 
           {firstDate && (
             <div>
-              <p className="text-lg font-semibold tracking-[-0.02em]">
-                Resumen
-              </p>
+              <p className="font-medium">Resumen</p>
 
               <p className="mt-2 text-sm text-gray-600">{service.name}</p>
 
@@ -374,13 +334,38 @@ export default function BookingCalendar({ service, blocks }: Props) {
               {canGeneratePlan && (
                 <button
                   type="button"
-                  onClick={handleContinue}
-                  disabled={isCheckingAvailability}
-                  className="mt-4 w-full rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5] disabled:opacity-70"
-                >
-                  {isCheckingAvailability
-                    ? "Verificando disponibilidad..."
-                    : "Continuar"}
+                  onClick={async () => {
+                    if (!firstBlockId) return
+
+                    setAvailabilityError("")
+
+                    const peopleCount =
+                      service.slug === "torno-en-pareja" ? 2 : 1
+
+                    const result = await validateSessionPlanAvailability({
+                      serviceId: service.id,
+                      sessions: sessionPlan,
+                      peopleCount,
+                    })
+
+                    if (!result.allAvailable) {
+                      setAvailabilityError(
+                        "No hay disponibilidad en todas las sesiones."
+                      )
+                      return
+                    }
+
+                    const secondParams =
+                      needsSecondDay && secondDate && secondBlockId
+                        ? `&secondDate=${secondDate}&secondBlockId=${secondBlockId}`
+                        : ""
+
+                    router.push(
+                      `/reservar/${service.slug}/datos?date=${firstDate}&blockId=${firstBlockId}${secondParams}`
+                    )
+                  }}
+                    className="mt-4 w-full rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#4ca9b5]"                >
+                  Continuar
                 </button>
               )}
             </div>

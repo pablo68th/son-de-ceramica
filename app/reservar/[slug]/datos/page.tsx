@@ -92,7 +92,7 @@ export default async function DatosPage({
 
   return (
     <main className="min-h-screen bg-[#F7F5F2] px-4 py-6 text-[#333333]">
-      <section className="mx-auto max-w-md">
+      <section className="animate-soft-enter mx-auto max-w-md">
         <div className="mb-5 flex items-center justify-between">
           <Link
             href={`/reservar/${slug}`}
@@ -112,15 +112,15 @@ export default async function DatosPage({
 
             <div className="relative">
               <p className="text-xs uppercase tracking-[0.25em] text-[#333333]/60">
-                Último paso
+                Tus datos
               </p>
 
               <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.03em]">
-                Completa tu reserva
+                Déjanos tus datos
               </h1>
 
               <p className="mt-3 text-sm leading-6 text-[#333333]/65">
-                Revisa los detalles y déjanos tus datos para apartar tu lugar.
+                Completa la información de contacto para preparar tu confirmación.
               </p>
             </div>
           </div>

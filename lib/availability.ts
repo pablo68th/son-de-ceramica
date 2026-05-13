@@ -37,7 +37,13 @@ export async function getAvailability(
 
   const { data: sessions, error: sessionsError } = await supabase
     .from("reservation_sessions")
-    .select("people_count")
+    .select(`
+      people_count,
+      reservations (
+        payment_status,
+        status
+      )
+    `)
     .eq("service_id", serviceId)
     .eq("session_date", date)
     .eq("block_id", blockId)
@@ -51,8 +57,18 @@ export async function getAvailability(
     }
   }
 
-  const reserved =
-    sessions?.reduce((total, session) => total + session.people_count, 0) ?? 0
+    const reserved =
+      sessions?.reduce((total, session: any) => {
+        const reservation = Array.isArray(session.reservations)
+          ? session.reservations[0]
+          : session.reservations
+
+        const blocksCapacity =
+          reservation?.status === "confirmed" &&
+          ["deposit_paid", "paid"].includes(reservation?.payment_status)
+
+        return blocksCapacity ? total + session.people_count : total
+      }, 0) ?? 0
 
   const remaining = service.capacity - reserved
 

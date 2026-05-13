@@ -69,7 +69,7 @@ export default async function ServiceReservationPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-[#F7F5F2] px-4 py-6 text-[#333333]">
-      <section className="mx-auto max-w-md">
+      <section className="animate-soft-enter mx-auto max-w-md">
         <div className="mb-5 flex items-center justify-between">
           <Link
             href="/reservar"
