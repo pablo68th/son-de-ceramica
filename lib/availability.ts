@@ -35,21 +35,16 @@ export async function getAvailability(
     }
   }
 
-  const { data: sessions, error: sessionsError } = await supabase
-    .from("reservation_sessions")
-    .select(`
-      people_count,
-      reservations (
-        payment_status,
-        status
-      )
-    `)
-    .eq("service_id", serviceId)
-    .eq("session_date", date)
-    .eq("block_id", blockId)
-    .eq("status", "confirmed")
+    const { data: reservedCount, error: reservedError } = await supabase.rpc(
+    "get_reserved_people_count",
+    {
+      p_service_id: serviceId,
+      p_session_date: date,
+      p_block_id: blockId,
+    }
+  )
 
-  if (sessionsError) {
+  if (reservedError) {
     return {
       available: false,
       remaining: 0,
@@ -57,18 +52,7 @@ export async function getAvailability(
     }
   }
 
-    const reserved =
-      sessions?.reduce((total, session: any) => {
-        const reservation = Array.isArray(session.reservations)
-          ? session.reservations[0]
-          : session.reservations
-
-        const blocksCapacity =
-          reservation?.status === "confirmed" &&
-          ["deposit_paid", "paid"].includes(reservation?.payment_status)
-
-        return blocksCapacity ? total + session.people_count : total
-      }, 0) ?? 0
+  const reserved = reservedCount ?? 0
 
   const remaining = service.capacity - reserved
 
@@ -147,3 +131,4 @@ export async function validateSessionPlanAvailability({
     results,
   }
 }
+

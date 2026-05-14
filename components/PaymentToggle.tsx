@@ -40,24 +40,36 @@ export function PaymentToggle({
 
   const [isSaving, setIsSaving] = useState(false)
 
-  async function togglePayment() {
-    const nextStatus = statusConfig[status].next
+async function togglePayment() {
+  const nextStatus = statusConfig[status].next
 
-    setIsSaving(true)
+  setIsSaving(true)
 
-    const { error } = await supabase
-      .from("reservations")
-      .update({
-        payment_status: nextStatus,
-      })
-      .eq("id", reservationId)
+  const { data, error } = await supabase
+    .from("reservations")
+    .update({
+      payment_status: nextStatus,
+    })
+    .eq("id", reservationId)
+    .select("id, payment_status")
+    .single()
 
-    if (!error) {
-      setStatus(nextStatus)
-    }
-
+  if (error) {
+    console.error("Error actualizando pago:", error)
+    alert(`No se pudo actualizar el pago: ${error.message}`)
     setIsSaving(false)
+    return
   }
+
+  if (!data) {
+    alert("No se actualizó ninguna reservación. Revisa permisos o ID.")
+    setIsSaving(false)
+    return
+  }
+
+  setStatus(data.payment_status as PaymentStatus)
+  setIsSaving(false)
+}
 
   return (
     <button
