@@ -1,7 +1,31 @@
-import { supabase } from "../../lib/supabaseClient"
+import { redirect } from "next/navigation"
+import { createSupabaseServerClient } from "../../lib/supabaseServer"
 import { AdminReservationsList } from "../../components/AdminReservationsList"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 export default async function AdminPage() {
+  const supabase = await createSupabaseServerClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect("/admin/login")
+  }
+
+  const { data: adminUser } = await supabase
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .single()
+
+  if (!adminUser) {
+    redirect("/admin/login")
+  }
+
   const { data: sessions, error } = await supabase
     .from("reservation_sessions")
     .select(`
@@ -31,8 +55,13 @@ export default async function AdminPage() {
     return (
       <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#1F1F1F]">
         <section className="mx-auto max-w-5xl rounded-2xl bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-light">Error cargando reservaciones </h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+          <h1 className="text-2xl font-light">
+            Error cargando reservaciones
+          </h1>
+
+          <p className="mt-2 text-sm text-red-600">
+            {error.message}
+          </p>
         </section>
       </main>
     )
@@ -55,7 +84,7 @@ export default async function AdminPage() {
           </h1>
 
           <p className="mt-2 text-gray-600">
-            Revisa las reservaciones registradas, datos de contacto, estado de pago y estado de la reserva.
+            Revisa las reservaciones registradas, datos de contacto, estado de pago y estado de la reservación.
           </p>
 
           <a
@@ -71,6 +100,3 @@ export default async function AdminPage() {
     </main>
   )
 }
-
-
-
