@@ -1,6 +1,9 @@
 import Link from "next/link"
 import { supabase } from "../../lib/supabaseClient"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 function getServicePresentation(service: any) {
   return {
     label: service.marketing_label ?? "Experiencia de cerámica",
