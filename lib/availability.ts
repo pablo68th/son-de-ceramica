@@ -54,8 +54,7 @@ export async function getAvailability(
 
   const reserved = reservedCount ?? 0
 
-  const remaining = service.capacity - reserved
-
+  const remaining = Math.max(service.capacity - reserved, 0)
   return {
     available: remaining > 0,
     remaining,

@@ -73,6 +73,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
   const router = useRouter()
 
   const needsSecondDay = service.weekly_frequency === 2
+  const peopleCount = service.slug === "torno-en-pareja" ? 2 : 1
 
   const [firstDate, setFirstDate] = useState("")
   const [firstBlockId, setFirstBlockId] = useState<string | null>(null)
@@ -81,6 +82,9 @@ export default function BookingCalendar({ service, blocks }: Props) {
   const [secondBlockId, setSecondBlockId] = useState<string | null>(null)
 
   const [availabilityError, setAvailabilityError] = useState("")
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
+  const [hasEnoughAvailability, setHasEnoughAvailability] = useState(false)
+
 
   const [availabilityInfo, setAvailabilityInfo] = useState<{
     remaining: number
@@ -181,6 +185,9 @@ export default function BookingCalendar({ service, blocks }: Props) {
               setSecondDate("")
               setSecondBlockId(null)
               setAvailabilityError("")
+              setAvailabilityInfo(null)
+              setHasEnoughAvailability(false)
+              setIsCheckingAvailability(false)
             }}
             className="w-full min-w-0 appearance-none rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base text-[#1F1F1F]"
           />
@@ -209,22 +216,27 @@ export default function BookingCalendar({ service, blocks }: Props) {
                     <button
                       key={block.id}
                       type="button"
-                        onClick={async () => {
-                          setFirstBlockId(block.id)
-                          setAvailabilityError("")
-                          setAvailabilityInfo(null)
+                      onClick={async () => {
+                        setFirstBlockId(block.id)
+                        setAvailabilityError("")
+                        setAvailabilityInfo(null)
+                        setIsCheckingAvailability(true)
+                        setHasEnoughAvailability(false)
 
-                          const availability = await getAvailability(
-                            service.id,
-                            firstDate,
-                            block.id
-                          )
+                        const availability = await getAvailability(
+                          service.id,
+                          firstDate,
+                          block.id
+                        )
 
-                          setAvailabilityInfo({
-                            remaining: availability.remaining,
-                            message: availability.message,
-                          })
-                        }}
+                        setAvailabilityInfo({
+                          remaining: availability.remaining,
+                          message: availability.message,
+                        })
+
+                        setHasEnoughAvailability(availability.remaining >= peopleCount)
+                        setIsCheckingAvailability(false)
+                      }}
                       className={`rounded-lg border p-3 text-left ${
                         isSelected  ? "border-[#59B9C6] bg-[#59B9C6] text-white"
   : "border-gray-200 bg-white text-[#333333]"
@@ -285,6 +297,9 @@ export default function BookingCalendar({ service, blocks }: Props) {
                           onClick={() => {
                             setSecondBlockId(block.id)
                             setAvailabilityError("")
+                            setAvailabilityInfo(null)
+                            setIsCheckingAvailability(true)
+                            setHasEnoughAvailability(false)
                           }}
                           className={`rounded-lg border p-3 text-left ${
                             isSelected ? "bg-black text-white" : "bg-white"
@@ -327,6 +342,12 @@ export default function BookingCalendar({ service, blocks }: Props) {
                       Cupo disponible
                     </p>
 
+                    {availabilityInfo && !hasEnoughAvailability && (
+                      <p className="mt-3 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
+                        No hay cupo suficiente para este horario.
+                      </p>
+                    )}
+
                     <p className="mt-1 text-lg font-semibold text-[#333333]">
                       {availabilityInfo.remaining} lugar
                       {availabilityInfo.remaining === 1 ? "" : "es"}
@@ -368,43 +389,45 @@ export default function BookingCalendar({ service, blocks }: Props) {
                 </p>
               )}
 
-              {canGeneratePlan && (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!firstBlockId) return
+                {canGeneratePlan && (
+                  <button
+                    type="button"
+                    disabled={isCheckingAvailability || !hasEnoughAvailability}
+                    onClick={async () => {
+                      if (!firstBlockId) return
 
-                    setAvailabilityError("")
+                      setAvailabilityError("")
 
-                    const peopleCount =
-                      service.slug === "torno-en-pareja" ? 2 : 1
+                      const peopleCount =
+                        service.slug === "torno-en-pareja" ? 2 : 1
 
-                    const result = await validateSessionPlanAvailability({
-                      serviceId: service.id,
-                      sessions: sessionPlan,
-                      peopleCount,
-                    })
+                      const result = await validateSessionPlanAvailability({
+                        serviceId: service.id,
+                        sessions: sessionPlan,
+                        peopleCount,
+                      })
 
-                    if (!result.allAvailable) {
-                      setAvailabilityError(
-                        "No hay disponibilidad en todas las sesiones."
+                      if (!result.allAvailable) {
+                        setAvailabilityError(
+                          "No hay cupo suficiente para una o más sesiones."
+                        )
+                        return
+                      }
+
+                      const secondParams =
+                        needsSecondDay && secondDate && secondBlockId
+                          ? `&secondDate=${secondDate}&secondBlockId=${secondBlockId}`
+                          : ""
+
+                      router.push(
+                        `/reservar/${service.slug}/datos?date=${firstDate}&blockId=${firstBlockId}${secondParams}`
                       )
-                      return
-                    }
-
-                    const secondParams =
-                      needsSecondDay && secondDate && secondBlockId
-                        ? `&secondDate=${secondDate}&secondBlockId=${secondBlockId}`
-                        : ""
-
-                    router.push(
-                      `/reservar/${service.slug}/datos?date=${firstDate}&blockId=${firstBlockId}${secondParams}`
-                    )
-                  }}
-                    className="mt-4 w-full rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#4ca9b5]"                >
-                  Continuar
-                </button>
-              )}
+                    }}
+                    className="mt-4 w-full rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#4ca9b5] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isCheckingAvailability ? "Consultando disponibilidad..." : "Continuar"}
+                  </button>
+                )}
             </div>
           )}
         </div>
