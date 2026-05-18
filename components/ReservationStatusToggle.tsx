@@ -7,40 +7,44 @@ type Status = "confirmed" | "cancelled"
 
 type Props = {
   reservationId: string
-  initialStatus?: Status
-  onStatusChange?: (status: Status) => void
+  initialStatus: Status
 }
 
-export function CancelReservationButton({
+export function ReservationStatusToggle({
   reservationId,
-  initialStatus = "confirmed",
-  onStatusChange,
+  initialStatus,
 }: Props) {
-  const [status, setStatus] = useState<Status>(initialStatus)
+  const [status, setStatus] = useState<Status>(initialStatus ?? "confirmed")
   const [isSaving, setIsSaving] = useState(false)
 
   const isCancelled = status === "cancelled"
 
-  async function toggleReservationStatus() {
-    const nextStatus: Status = isCancelled ? "confirmed" : "cancelled"
+  async function toggleStatus() {
+    const confirmMessage = isCancelled
+      ? "¿Seguro que quieres reactivar esta reservación?"
+      : "¿Seguro que quieres cancelar esta reservación?"
 
-    const confirmed = window.confirm(
-      isCancelled
-        ? "¿Seguro que quieres reactivar esta reservación?"
-        : "¿Seguro que quieres cancelar esta reservación?"
-    )
+    const confirmed = window.confirm(confirmMessage)
 
     if (!confirmed) return
 
+    const nextStatus = isCancelled ? "confirmed" : "cancelled"
+
     setIsSaving(true)
 
-    const { error: reservationError } = await supabase
+    const { data: reservation, error: reservationError } = await supabase
       .from("reservations")
       .update({ status: nextStatus })
       .eq("id", reservationId)
+      .select("id, status")
+      .single()
 
-    if (reservationError) {
-      alert(`No se pudo actualizar la reservación: ${reservationError.message}`)
+    if (reservationError || !reservation) {
+      alert(
+        `No se pudo actualizar la reservación: ${
+          reservationError?.message ?? "No se actualizó ninguna fila"
+        }`
+      )
       setIsSaving(false)
       return
     }
@@ -51,20 +55,19 @@ export function CancelReservationButton({
       .eq("reservation_id", reservationId)
 
     if (sessionsError) {
-      alert(`No se pudieron actualizar las sesiones: ${sessionsError.message}`)
+      alert(`La reservación cambió, pero las sesiones no: ${sessionsError.message}`)
       setIsSaving(false)
       return
     }
 
     setStatus(nextStatus)
-    onStatusChange?.(nextStatus)
     setIsSaving(false)
   }
 
   return (
     <button
       type="button"
-      onClick={toggleReservationStatus}
+      onClick={toggleStatus}
       disabled={isSaving}
       className={`rounded-full border px-4 py-2 text-sm font-medium transition active:scale-[0.98] disabled:opacity-50 ${
         isCancelled
@@ -72,8 +75,11 @@ export function CancelReservationButton({
           : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
       }`}
     >
-      {isSaving ? "Guardando..." : isCancelled ? "Reactivar" : "Cancelar"}
+      {isSaving
+        ? "Guardando..."
+        : isCancelled
+          ? "Reactivar"
+          : "Cancelar"}
     </button>
   )
 }
-

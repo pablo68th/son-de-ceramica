@@ -10,79 +10,72 @@ type Props = {
   initialStatus: PaymentStatus
 }
 
-const statusConfig = {
-  pending: {
-    label: "Pendiente",
-    next: "deposit_paid" as PaymentStatus,
-    className: "bg-white text-gray-700 border-gray-300",
-  },
+const options: {
+  value: PaymentStatus
+  label: string
+}[] = [
+  { value: "pending", label: "Pendiente" },
+  { value: "deposit_paid", label: "Anticipo 50%" },
+  { value: "paid", label: "Pagado" },
+]
 
-  deposit_paid: {
-    label: "Anticipo 50%",
-    next: "paid" as PaymentStatus,
-    className: "bg-[#59B9C6] text-white border-[#59B9C6]",
-  },
-
-  paid: {
-    label: "Pagado",
-    next: "pending" as PaymentStatus,
-    className: "bg-black text-white border-black",
-  },
-}
-
-export function PaymentToggle({
-  reservationId,
-  initialStatus,
-}: Props) {
+export function PaymentToggle({ reservationId, initialStatus }: Props) {
   const [status, setStatus] = useState<PaymentStatus>(
     initialStatus ?? "pending"
   )
-
   const [isSaving, setIsSaving] = useState(false)
 
-async function togglePayment() {
-  const nextStatus = statusConfig[status].next
+  async function updatePayment(nextStatus: PaymentStatus) {
+    if (nextStatus === status) return
 
-  setIsSaving(true)
+    setIsSaving(true)
 
-  const { data, error } = await supabase
-    .from("reservations")
-    .update({
-      payment_status: nextStatus,
-    })
-    .eq("id", reservationId)
-    .select("id, payment_status")
-    .single()
+    const { data, error } = await supabase
+      .from("reservations")
+      .update({
+        payment_status: nextStatus,
+      })
+      .eq("id", reservationId)
+      .select("id, payment_status")
+      .single()
 
-  if (error) {
-    console.error("Error actualizando pago:", error)
-    alert(`No se pudo actualizar el pago: ${error.message}`)
+    if (error) {
+      alert(`No se pudo actualizar el pago: ${error.message}`)
+      setIsSaving(false)
+      return
+    }
+
+    setStatus(data.payment_status as PaymentStatus)
     setIsSaving(false)
-    return
   }
-
-  if (!data) {
-    alert("No se actualizó ninguna reservación. Revisa permisos o ID.")
-    setIsSaving(false)
-    return
-  }
-
-  setStatus(data.payment_status as PaymentStatus)
-  setIsSaving(false)
-}
 
   return (
-    <button
-      type="button"
-      onClick={togglePayment}
-      disabled={isSaving}
-      className={`rounded-full border px-3 py-1 text-sm transition active:scale-[0.98] disabled:opacity-50 ${
-        statusConfig[status].className
-      }`}
-    >
-      {isSaving
-        ? "Guardando..."
-        : statusConfig[status].label}
-    </button>
+    <div className="rounded-2xl bg-[#F7F5F2] p-2">
+      <p className="mb-2 px-2 text-xs uppercase tracking-[0.18em] text-[#333333]/45">
+        Estado de pago
+      </p>
+
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => {
+          const isSelected = status === option.value
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => updatePayment(option.value)}
+              disabled={isSaving}
+              className={`rounded-full border px-3 py-1 text-sm font-medium transition active:scale-[0.98] disabled:opacity-50 ${
+                isSelected
+                  ? "border-[#59B9C6] bg-[#59B9C6] text-white"
+                  : "border-gray-200 bg-white text-gray-600"
+              }`}
+            >
+              {option.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }

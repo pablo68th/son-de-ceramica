@@ -9,26 +9,18 @@ type Props = {
 }
 
 function formatDate(date: string) {
-  return new Date(date + "T00:00:00").toLocaleDateString(
-    "es-MX",
-    {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }
-  )
+  return new Date(date + "T00:00:00").toLocaleDateString("es-MX", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
 }
 
 function formatTime(session: any) {
-  if (!session.schedule_blocks) {
-    return "Horario no disponible"
-  }
+  if (!session.schedule_blocks) return "Horario no disponible"
 
-  return `${session.schedule_blocks.start_time.slice(
-    0,
-    5
-  )} – ${session.schedule_blocks.end_time.slice(0, 5)}`
+  return `${session.schedule_blocks.start_time.slice(0, 5)} – ${session.schedule_blocks.end_time.slice(0, 5)}`
 }
 
 function getReservation(session: any) {
@@ -43,66 +35,68 @@ function getService(session: any) {
     : session.services
 }
 
-export function AdminReservationsList({
-  sessions,
-}: Props) {
+function getTodayDate() {
+  return new Date().toISOString().split("T")[0]
+}
+
+export function AdminReservationsList({ sessions }: Props) {
   const [filter, setFilter] = useState("active")
+  const [statusByReservation, setStatusByReservation] = useState<
+    Record<string, "confirmed" | "cancelled">
+  >({})
 
-  const groupedByReservation = sessions.reduce(
-    (groups: any, session: any) => {
-      const reservation = getReservation(session)
+  const today = getTodayDate()
 
-      if (!reservation?.id) {
-        return groups
+  const groupedByReservation = sessions.reduce((groups: any, session: any) => {
+    const reservation = getReservation(session)
+    if (!reservation?.id) return groups
+
+    if (!groups[reservation.id]) {
+      groups[reservation.id] = {
+        reservation,
+        service: getService(session),
+        sessions: [],
       }
+    }
 
-      if (!groups[reservation.id]) {
-        groups[reservation.id] = {
-          reservation,
-          service: getService(session),
-          sessions: [],
-        }
-      }
+    groups[reservation.id].sessions.push(session)
 
-      groups[reservation.id].sessions.push(session)
+    return groups
+  }, {})
 
-      return groups
-    },
-    {}
-  )
-
-  const reservations = Object.values(
-    groupedByReservation
-  ).map((item: any) => {
-    const sortedSessions = item.sessions.sort(
-      (a: any, b: any) =>
-        String(a.session_date).localeCompare(
-          String(b.session_date)
-        )
+  const reservations = Object.values(groupedByReservation).map((item: any) => {
+    const sortedSessions = item.sessions.sort((a: any, b: any) =>
+      String(a.session_date).localeCompare(String(b.session_date))
     )
 
-    const isCancelled = sortedSessions.every(
-      (session: any) =>
-        session.status === "cancelled"
+    const currentStatus =
+      statusByReservation[item.reservation.id] ??
+      item.reservation?.status ??
+      "confirmed"
+
+    const isCancelled = currentStatus === "cancelled"
+
+    const hasFutureOrTodaySession = sortedSessions.some(
+      (session: any) => session.session_date >= today
     )
+
+    const isPast = !isCancelled && !hasFutureOrTodaySession
 
     return {
       ...item,
       sessions: sortedSessions,
+      currentStatus,
       isCancelled,
+      isPast,
     }
   })
 
-  const filteredReservations =
-    reservations.filter((item: any) => {
-      if (filter === "all") return true
-
-      if (filter === "cancelled") {
-        return item.isCancelled
-      }
-
-      return !item.isCancelled
-    })
+  const filteredReservations = reservations.filter((item: any) => {
+    if (filter === "all") return true
+    if (filter === "cancelled") return item.isCancelled
+    if (filter === "past") return item.isPast
+    return !item.isCancelled && !item.isPast
+  })
 
   return (
     <>
@@ -116,7 +110,19 @@ export function AdminReservationsList({
               : "border-gray-300 bg-white text-gray-700"
           }`}
         >
-          Activas
+          Vigentes
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFilter("past")}
+          className={`rounded-full border px-4 py-2 text-sm ${
+            filter === "past"
+              ? "border-black bg-black text-white"
+              : "border-gray-300 bg-white text-gray-700"
+          }`}
+        >
+          Anteriores
         </button>
 
         <button
@@ -147,59 +153,49 @@ export function AdminReservationsList({
       <div className="mt-8 grid gap-4">
         {filteredReservations.map((item: any) => {
           const reservation = item.reservation
-
           const firstSession = item.sessions[0]
-
           const service = item.service
+          const shouldDim = item.isCancelled || item.isPast
 
           return (
             <article
               key={reservation.id}
-              className={`rounded-3xl bg-white p-5 shadow-sm ${
-                item.isCancelled
-                  ? "border border-red-100 bg-red-50/40"
-                  : ""
+              className={`rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 transition ${
+                shouldDim ? "bg-white/70" : ""
               }`}
             >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <div>
+                <div className={shouldDim ? "opacity-45" : ""}>
                   <p className="text-xs uppercase tracking-[0.2em] text-[#59B9C6]">
                     {firstSession?.session_date
-                      ? `Inicia: ${formatDate(
-                          firstSession.session_date
-                        )}`
+                      ? `Inicia: ${formatDate(firstSession.session_date)}`
                       : "Sin fecha"}
                   </p>
 
                   <h3 className="mt-2 text-lg font-semibold tracking-[-0.02em]">
-                    {reservation.customer_name}{" "}
-                    {
-                      reservation.customer_last_name
-                    }
+                    {reservation.customer_name} {reservation.customer_last_name}
                   </h3>
 
                   <p className="mt-1 text-sm text-gray-600">
-                    {service?.name ??
-                      "Servicio no disponible"}
+                    {service?.name ?? "Servicio no disponible"}
                   </p>
 
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
-                      Personas:{" "}
-                      {firstSession?.people_count ??
-                        "-"}
+                      Personas: {firstSession?.people_count ?? "-"}
                     </span>
 
                     <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
-                      Sesiones:{" "}
-                      {item.sessions.length}
+                      Sesiones: {item.sessions.length}
                     </span>
 
                     <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
                       Estado:{" "}
                       {item.isCancelled
-                        ? "Cancelada"
-                        : "Activa"}
+                        ? "Reservación cancelada"
+                        : item.isPast
+                          ? "Reservación anterior"
+                          : "Reservación vigente"}
                     </span>
                   </div>
                 </div>
@@ -207,23 +203,19 @@ export function AdminReservationsList({
                 <div className="flex flex-col items-start gap-2 md:items-end">
                   <PaymentToggle
                     reservationId={reservation.id}
-                    initialStatus={
-                      reservation.payment_status ??
-                      "pending"
-                    }
+                    initialStatus={reservation.payment_status ?? "pending"}
                   />
 
-                  {!item.isCancelled ? (
-                    <CancelReservationButton
-                      reservationId={
-                        reservation.id
-                      }
-                    />
-                  ) : (
-                    <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm text-red-700">
-                      Cancelada
-                    </span>
-                  )}
+                  <CancelReservationButton
+                    reservationId={reservation.id}
+                    initialStatus={item.currentStatus}
+                    onStatusChange={(nextStatus) =>
+                      setStatusByReservation((current) => ({
+                        ...current,
+                        [reservation.id]: nextStatus,
+                      }))
+                    }
+                  />
                 </div>
               </div>
 
@@ -232,15 +224,14 @@ export function AdminReservationsList({
                   Ver sesiones y contacto
                 </summary>
 
-                <div className="mt-4 grid gap-4 text-sm text-gray-600">
+                <div
+                  className={`mt-4 grid gap-4 text-sm text-gray-600 ${
+                    shouldDim ? "opacity-45" : ""
+                  }`}
+                >
                   <div>
-                    <p>
-                      Tel: {reservation.phone}
-                    </p>
-
-                    <p>
-                      Correo: {reservation.email}
-                    </p>
+                    <p>Tel: {reservation.phone}</p>
+                    <p>Correo: {reservation.email}</p>
                   </div>
 
                   <div className="rounded-2xl bg-[#F7F5F2] p-4">
@@ -249,18 +240,12 @@ export function AdminReservationsList({
                     </p>
 
                     <ul className="mt-3 space-y-2">
-                      {item.sessions.map(
-                        (session: any) => (
-                          <li key={session.id}>
-                            •{" "}
-                            {formatDate(
-                              session.session_date
-                            )}{" "}
-                            ·{" "}
-                            {formatTime(session)}
-                          </li>
-                        )
-                      )}
+                      {item.sessions.map((session: any) => (
+                        <li key={session.id}>
+                          • {formatDate(session.session_date)} ·{" "}
+                          {formatTime(session)}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>
@@ -271,7 +256,7 @@ export function AdminReservationsList({
 
         {filteredReservations.length === 0 && (
           <div className="rounded-3xl bg-white p-6 text-center shadow-sm">
-            No hay reservas para este filtro.
+            No hay reservaciones para este filtro.
           </div>
         )}
       </div>

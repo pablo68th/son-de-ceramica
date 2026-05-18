@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { createSupabaseServerClient } from "../../../lib/supabaseServer"
 import { AdminServicesList } from "../../../components/AdminServicesList"
+import { AdminLogoutButton } from "../../../components/AdminLogoutButton"
 
 export default async function AdminServicesPage() {
   const supabase = await createSupabaseServerClient()
@@ -45,14 +46,24 @@ export default async function AdminServicesPage() {
   return (
     <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#1F1F1F]">
       <section className="animate-soft-enter mx-auto max-w-5xl">
-        <div className="flex flex-wrap gap-3">
-          <Link href="/admin" className="text-sm text-[#1F1F1F]/70 underline">
-            Volver a reservaciones
-          </Link>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/admin"
+              className="text-sm text-[#1F1F1F]/70 underline"
+            >
+              Volver a reservaciones
+            </Link>
 
-          <Link href="/" className="text-sm text-[#1F1F1F]/70 underline">
-            Volver al inicio
-          </Link>
+            <Link
+              href="/"
+              className="text-sm text-[#1F1F1F]/70 underline"
+            >
+              Volver al inicio
+            </Link>
+          </div>
+
+          <AdminLogoutButton />
         </div>
 
         <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm">

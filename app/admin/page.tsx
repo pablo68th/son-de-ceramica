@@ -40,7 +40,8 @@ export default async function AdminPage() {
         customer_last_name,
         phone,
         email,
-        payment_status
+        payment_status,
+        status
       ),
       services (
         name
