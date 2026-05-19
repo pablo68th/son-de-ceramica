@@ -19,6 +19,25 @@ export async function getAvailability(
     }
   }
 
+    const { data: blockedDates } = await supabase
+    .from("blocked_schedule_dates")
+    .select("*")
+    .eq("date", date)
+
+  const isBlocked = blockedDates?.some((blocked) => {
+    if (!blocked.block_id) return true
+
+    return blocked.block_id === blockId
+  })
+
+  if (isBlocked) {
+    return {
+      available: false,
+      remaining: 0,
+      message: "Horario no disponible",
+    }
+  }
+
   const { data: blocked } = await supabase
     .from("blocked_dates")
     .select("*")
