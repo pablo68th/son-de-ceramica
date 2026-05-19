@@ -157,6 +157,13 @@ export function AdminReservationsList({ sessions }: Props) {
           const service = item.service
           const shouldDim = item.isCancelled || item.isPast
 
+          const nextSession = item.sessions.find(
+  (session: any) => session.session_date >= today
+)
+
+const lastSession =
+  item.sessions[item.sessions.length - 1]
+
           return (
             <article
               key={reservation.id}
@@ -166,11 +173,27 @@ export function AdminReservationsList({ sessions }: Props) {
             >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className={shouldDim ? "opacity-45" : ""}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-[#59B9C6]">
-                    {firstSession?.session_date
-                      ? `Inicia: ${formatDate(firstSession.session_date)}`
-                      : "Sin fecha"}
-                  </p>
+<div className="space-y-1">
+  {nextSession ? (
+    <p className="text-sm uppercase tracking-[0.2em] text-[#59B9C6]">
+      Siguiente sesión:{" "}
+      {formatDate(nextSession.session_date)}
+    </p>
+  ) : (
+    <p className="text-sm font-semibold tracking-[0.12em] text-gray-500">
+      Última sesión:{" "}
+      {lastSession?.session_date
+        ? formatDate(lastSession.session_date)
+        : "Sin fecha"}
+    </p>
+  )}
+
+  <p className="text-xs text-[#1F1F1F]/60">
+    {firstSession?.session_date
+      ? `Primera sesión: ${formatDate(firstSession.session_date)}`
+      : "Sin fecha"}
+  </p>
+</div>
 
                   <h3 className="mt-2 text-lg font-semibold tracking-[-0.02em]">
                     {reservation.customer_name} {reservation.customer_last_name}
