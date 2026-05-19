@@ -64,7 +64,8 @@ export function AdminReservationsList({ sessions }: Props) {
     return groups
   }, {})
 
-  const reservations = Object.values(groupedByReservation).map((item: any) => {
+ const reservations = Object.values(groupedByReservation)
+  .map((item: any) => {
     const sortedSessions = item.sessions.sort((a: any, b: any) =>
       String(a.session_date).localeCompare(String(b.session_date))
     )
@@ -76,9 +77,11 @@ export function AdminReservationsList({ sessions }: Props) {
 
     const isCancelled = currentStatus === "cancelled"
 
-    const hasFutureOrTodaySession = sortedSessions.some(
+    const nextSession = sortedSessions.find(
       (session: any) => session.session_date >= today
     )
+
+    const hasFutureOrTodaySession = Boolean(nextSession)
 
     const isPast = !isCancelled && !hasFutureOrTodaySession
 
@@ -88,8 +91,14 @@ export function AdminReservationsList({ sessions }: Props) {
       currentStatus,
       isCancelled,
       isPast,
+      nextSessionDate: nextSession?.session_date ?? null,
+      sortDate:
+        nextSession?.session_date ??
+        sortedSessions[sortedSessions.length - 1]?.session_date ??
+        "9999-12-31",
     }
   })
+  .sort((a: any, b: any) => String(a.sortDate).localeCompare(String(b.sortDate)))
 
   const filteredReservations = reservations.filter((item: any) => {
     if (filter === "all") return true
