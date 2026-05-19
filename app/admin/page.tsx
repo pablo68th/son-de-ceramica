@@ -93,12 +93,21 @@ export default async function AdminPage() {
             Revisa las reservaciones registradas, datos de contacto, estado de pago y estado de la reservación.
           </p>
 
-          <a
-            href="/admin/servicios"
-            className="mt-5 inline-block rounded-2xl bg-[#59B9C6] px-5 py-3 text-sm font-semibold !text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
-          >
-            Editar servicios
-          </a>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <a
+              href="/admin/servicios"
+              className="inline-block rounded-2xl bg-[#59B9C6] px-5 py-3 text-sm font-semibold !text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
+            >
+              Editar servicios
+            </a>
+
+            <a
+              href="/admin/bloqueos"
+              className="inline-block rounded-2xl border border-[#59B9C6]/20 bg-white px-5 py-3 text-sm font-semibold text-[#59B9C6] transition active:scale-[0.98]"
+            >
+              Bloquear fechas
+            </a>
+          </div>
         </div>
 
         <AdminReservationsList sessions={sessions ?? []} />
@@ -106,3 +115,4 @@ export default async function AdminPage() {
     </main>
   )
 }
+
