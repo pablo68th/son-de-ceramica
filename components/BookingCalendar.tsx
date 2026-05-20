@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { PageTransitionOverlay } from "./PageTransitionOverlay"
 import { useRouter } from "next/navigation"
 import { generateSessionPlan } from "../lib/sessionGenerator"
 import {
@@ -128,6 +129,8 @@ export default function BookingCalendar({ service, blocks }: Props) {
 
   const [availabilityError, setAvailabilityError] = useState("")
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
+
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   const [firstAvailabilityInfo, setFirstAvailabilityInfo] =
     useState<AvailabilityInfo | null>(null)
@@ -272,6 +275,10 @@ export default function BookingCalendar({ service, blocks }: Props) {
   }
 
   return (
+    <>
+  {isTransitioning && (
+    <PageTransitionOverlay message="Preparando tu solicitud..." />
+  )}
     <section className="animate-soft-enter mt-6 rounded-[2rem] border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
       <h2 className="mb-2 text-xl font-semibold tracking-[-0.03em]">
         Elige tu horario
@@ -491,6 +498,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
                   disabled={isCheckingAvailability || !hasEnoughAvailability}
                   onClick={async () => {
                     if (!firstBlockId) return
+                    setIsTransitioning(true)
 
                     setAvailabilityError("")
 
@@ -504,6 +512,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
                       setAvailabilityError(
                         "No hay cupo suficiente para una o más sesiones."
                       )
+                      setIsTransitioning(false)
                       return
                     }
 
@@ -528,6 +537,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
         </div>
       </div>
     </section>
+  </>
   )
 }
 
