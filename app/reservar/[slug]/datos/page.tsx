@@ -2,6 +2,9 @@ import Link from "next/link"
 import { supabase } from "../../../../lib/supabaseClient"
 import { ReservationForm } from "../../../../components/ReservationForm"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 type PageProps = {
   params: Promise<{
     slug: string
@@ -24,6 +27,13 @@ function formatDate(dateString: string) {
   })
 }
 
+function getPresentation(service: any) {
+  return {
+    title: service.marketing_title ?? service.name,
+    label: service.marketing_label ?? "Experiencia",
+  }
+}
+
 export default async function DatosPage({
   params,
   searchParams,
@@ -36,12 +46,12 @@ export default async function DatosPage({
       <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#333333]">
         <section className="mx-auto max-w-md rounded-[2rem] bg-white p-6 shadow-sm">
           <h1 className="text-2xl font-semibold tracking-[-0.03em]">
-            Falta información de la reserva
+            Falta información de la reservación
           </h1>
 
           <Link
             href={`/reservar/${slug}`}
-            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
+            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold !text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
           >
             Volver a elegir horario
           </Link>
@@ -76,12 +86,12 @@ export default async function DatosPage({
       <main className="min-h-screen bg-[#F7F5F2] p-6 text-[#333333]">
         <section className="mx-auto max-w-md rounded-[2rem] bg-white p-6 shadow-sm">
           <h1 className="text-2xl font-semibold tracking-[-0.03em]">
-            Error cargando la información de la reserva
+            Error cargando la información
           </h1>
 
           <Link
             href="/reservar"
-            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold text-white"
+            className="mt-5 block rounded-2xl bg-[#59B9C6] px-5 py-4 text-center text-sm font-semibold !text-white"
           >
             Volver a experiencias
           </Link>
@@ -89,6 +99,8 @@ export default async function DatosPage({
       </main>
     )
   }
+
+  const presentation = getPresentation(service)
 
   return (
     <main className="min-h-screen bg-[#F7F5F2] px-4 py-6 text-[#333333]">
@@ -102,25 +114,25 @@ export default async function DatosPage({
           </Link>
 
           <p className="text-xs uppercase tracking-[0.22em] text-[#59B9C6]">
-            Confirmación
+            Solicitud
           </p>
         </div>
 
-        <section className="overflow-hidden rounded-[2rem] bg-white shadow-sm">
+        <section className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-black/5">
           <div className="relative bg-gradient-to-br from-[#DCCEC4] via-[#F2D9DC] to-[#59B9C6]/40 p-6">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.35),transparent_34%)]" />
 
             <div className="relative">
-              <p className="text-xs uppercase tracking-[0.25em] text-[#333333]/60">
-                Tus datos
+              <p className="inline-flex rounded-full bg-white/75 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#333333]/80 backdrop-blur">
+                {presentation.label}
               </p>
 
               <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.03em]">
-                Déjanos tus datos
+                Completa tu solicitud
               </h1>
 
               <p className="mt-3 text-sm leading-6 text-[#333333]/65">
-                Completa la información de contacto para preparar tu confirmación.
+                Déjanos tus datos para preparar la confirmación de tu experiencia.
               </p>
             </div>
           </div>
@@ -128,7 +140,7 @@ export default async function DatosPage({
           <div className="p-5">
             <div className="rounded-[1.5rem] bg-[#F7F5F2] p-5 text-sm text-[#333333]/70">
               <p className="text-lg font-semibold tracking-[-0.02em] text-[#333333]">
-                {service.name}
+                {presentation.title}
               </p>
 
               <div className="mt-4 space-y-3">
@@ -163,6 +175,10 @@ export default async function DatosPage({
                   </div>
                 )}
               </div>
+            </div>
+
+            <div className="mt-4 rounded-[1.5rem] bg-[#F7F5F2] p-5 text-sm leading-6 text-[#333333]/70">
+              Enviar esta solicitud no aparta automáticamente tu lugar. La reservación se confirma una vez validado el anticipo del 50%.
             </div>
 
             <ReservationForm
