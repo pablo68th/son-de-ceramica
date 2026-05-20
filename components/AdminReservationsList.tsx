@@ -64,41 +64,41 @@ export function AdminReservationsList({ sessions }: Props) {
     return groups
   }, {})
 
- const reservations = Object.values(groupedByReservation)
-  .map((item: any) => {
-    const sortedSessions = item.sessions.sort((a: any, b: any) =>
-      String(a.session_date).localeCompare(String(b.session_date))
+  const reservations = Object.values(groupedByReservation)
+    .map((item: any) => {
+      const sortedSessions = item.sessions.sort((a: any, b: any) =>
+        String(a.session_date).localeCompare(String(b.session_date))
+      )
+
+      const currentStatus =
+        statusByReservation[item.reservation.id] ??
+        item.reservation?.status ??
+        "confirmed"
+
+      const isCancelled = currentStatus === "cancelled"
+
+      const nextSession = sortedSessions.find(
+        (session: any) => session.session_date >= today
+      )
+
+      const hasFutureOrTodaySession = Boolean(nextSession)
+      const isPast = !isCancelled && !hasFutureOrTodaySession
+
+      return {
+        ...item,
+        sessions: sortedSessions,
+        currentStatus,
+        isCancelled,
+        isPast,
+        sortDate:
+          nextSession?.session_date ??
+          sortedSessions[sortedSessions.length - 1]?.session_date ??
+          "9999-12-31",
+      }
+    })
+    .sort((a: any, b: any) =>
+      String(a.sortDate).localeCompare(String(b.sortDate))
     )
-
-    const currentStatus =
-      statusByReservation[item.reservation.id] ??
-      item.reservation?.status ??
-      "confirmed"
-
-    const isCancelled = currentStatus === "cancelled"
-
-    const nextSession = sortedSessions.find(
-      (session: any) => session.session_date >= today
-    )
-
-    const hasFutureOrTodaySession = Boolean(nextSession)
-
-    const isPast = !isCancelled && !hasFutureOrTodaySession
-
-    return {
-      ...item,
-      sessions: sortedSessions,
-      currentStatus,
-      isCancelled,
-      isPast,
-      nextSessionDate: nextSession?.session_date ?? null,
-      sortDate:
-        nextSession?.session_date ??
-        sortedSessions[sortedSessions.length - 1]?.session_date ??
-        "9999-12-31",
-    }
-  })
-  .sort((a: any, b: any) => String(a.sortDate).localeCompare(String(b.sortDate)))
 
   const filteredReservations = reservations.filter((item: any) => {
     if (filter === "all") return true
@@ -167,11 +167,36 @@ export function AdminReservationsList({ sessions }: Props) {
           const shouldDim = item.isCancelled || item.isPast
 
           const nextSession = item.sessions.find(
-  (session: any) => session.session_date >= today
-)
+            (session: any) => session.session_date >= today
+          )
 
-const lastSession =
-  item.sessions[item.sessions.length - 1]
+          const lastSession = item.sessions[item.sessions.length - 1]
+
+          const occupiedSpots = nextSession
+            ? sessions
+                .filter((session: any) => {
+                  const sessionReservation = getReservation(session)
+
+                  return (
+                    session.session_date === nextSession.session_date &&
+                    session.block_id === nextSession.block_id &&
+                    session.service_id === nextSession.service_id &&
+                    session.status !== "cancelled" &&
+                    sessionReservation?.status !== "cancelled" &&
+                    ["deposit_paid", "paid"].includes(
+                      sessionReservation?.payment_status
+                    )
+                  )
+                })
+                .reduce(
+                  (total: number, session: any) =>
+                    total + (session.people_count ?? 0),
+                  0
+                )
+            : 0
+
+          const capacity = service?.capacity ?? 0
+          const remainingSpots = Math.max(capacity - occupiedSpots, 0)
 
           return (
             <article
@@ -182,27 +207,26 @@ const lastSession =
             >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className={shouldDim ? "opacity-45" : ""}>
-<div className="space-y-1">
-  {nextSession ? (
-    <p className="text-sm uppercase tracking-[0.2em] text-[#59B9C6]">
-      Siguiente sesión:{" "}
-      {formatDate(nextSession.session_date)}
-    </p>
-  ) : (
-    <p className="text-sm font-semibold tracking-[0.12em] text-gray-500">
-      Última sesión:{" "}
-      {lastSession?.session_date
-        ? formatDate(lastSession.session_date)
-        : "Sin fecha"}
-    </p>
-  )}
+                  <div className="space-y-1">
+                    {nextSession ? (
+                      <p className="text-sm uppercase tracking-[0.2em] text-[#59B9C6]">
+                        Siguiente sesión: {formatDate(nextSession.session_date)}
+                      </p>
+                    ) : (
+                      <p className="text-sm uppercase tracking-[0.2em] text-gray-500">
+                        Última sesión:{" "}
+                        {lastSession?.session_date
+                          ? formatDate(lastSession.session_date)
+                          : "Sin fecha"}
+                      </p>
+                    )}
 
-  <p className="text-xs text-[#1F1F1F]/60">
-    {firstSession?.session_date
-      ? `Primera sesión: ${formatDate(firstSession.session_date)}`
-      : "Sin fecha"}
-  </p>
-</div>
+                    <p className="text-xs text-[#1F1F1F]/60">
+                      {firstSession?.session_date
+                        ? `Primera sesión: ${formatDate(firstSession.session_date)}`
+                        : "Sin fecha"}
+                    </p>
+                  </div>
 
                   <h3 className="mt-2 text-lg font-semibold tracking-[-0.02em]">
                     {reservation.customer_name} {reservation.customer_last_name}
@@ -229,6 +253,12 @@ const lastSession =
                           ? "Reservación anterior"
                           : "Reservación vigente"}
                     </span>
+
+                    {nextSession && !item.isCancelled && (
+                      <span className="rounded-full bg-[#F7F5F2] px-3 py-1 text-xs text-gray-700">
+                        Cupo restante: {remainingSpots} / {capacity}
+                      </span>
+                    )}
                   </div>
                 </div>
 

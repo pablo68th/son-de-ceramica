@@ -31,6 +31,8 @@ export default async function AdminPage() {
     .from("reservation_sessions")
     .select(`
       id,
+      service_id,
+      block_id,
       session_date,
       people_count,
       status,
@@ -44,7 +46,8 @@ export default async function AdminPage() {
         status
       ),
       services (
-        name
+        name,
+        capacity
       ),
       schedule_blocks (
         start_time,
