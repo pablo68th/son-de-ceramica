@@ -115,7 +115,7 @@ setSuccessMessage(
     return (
       <div className="mt-6 rounded-[2rem] bg-[#F7F5F2] p-6 text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#59B9C6]/15 text-3xl text-[#59B9C6]">
-          ♡
+          ✦
         </div>
 
         <p className="text-xs uppercase tracking-[0.24em] text-[#59B9C6]">
@@ -178,7 +178,7 @@ setSuccessMessage(
 
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
-              Correo electrónico
+              Correo electrónico 
             </p>
 
             <p className="mt-1 text-base font-medium">
@@ -198,16 +198,15 @@ setSuccessMessage(
             </div>
           )}
         </div>
+          <div className="mt-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
+              Experiencia
+            </p>
 
-              <div>
-        <p className="text-xs uppercase tracking-[0.18em] text-[#333333]/45">
-          Experiencia
-        </p>
-
-        <p className="mt-1 text-base font-medium">
-          {service.name}
-        </p>
-      </div>
+            <p className="mt-1 text-base font-medium">
+              {service.name}
+            </p>
+          </div>
 
         {errorMessage && (
           <p className="mt-4 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
@@ -303,7 +302,7 @@ setSuccessMessage(
         />
 
         <span>
-          Acepto el aviso de privacidad y el uso de mis datos para gestionar mi reserva.
+          Acepto el aviso de privacidad y el uso de mis datos para gestionar mi solicitud de reservación.
         </span>
       </label>
 
@@ -341,7 +340,7 @@ setSuccessMessage(
         }}
         className="mt-2 rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition active:scale-[0.98] hover:bg-[#4ca9b5]"
       >
-        Revisar reserva
+        Revisar solicitud
       </button>
     </div>
   )

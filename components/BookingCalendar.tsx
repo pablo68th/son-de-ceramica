@@ -166,7 +166,13 @@ export default function BookingCalendar({ service, blocks }: Props) {
 
   return (
     <section className="animate-soft-enter mt-6 rounded-[2rem] border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
-      <h2 className="text-lg font-semibold mb-4">Elige tus días</h2>
+      <h2 className="mb-2 text-xl font-semibold tracking-[-0.03em]">
+        Elige tu horario
+      </h2>
+
+      <p className="mb-5 text-sm leading-6 text-[#333333]/65">
+        Selecciona los días y horarios disponibles para tu experiencia.
+      </p>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="min-w-0">
@@ -215,6 +221,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
                   return (
                     <button
                       key={block.id}
+                      disabled={isCheckingAvailability}
                       type="button"
                       onClick={async () => {
                         setFirstBlockId(block.id)
@@ -237,7 +244,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
                         setHasEnoughAvailability(availability.remaining >= peopleCount)
                         setIsCheckingAvailability(false)
                       }}
-                      className={`rounded-lg border p-3 text-left ${
+                      className={`rounded-2xl border p-4 text-left transition disabled:opacity-50 ${
                         isSelected  ? "border-[#59B9C6] bg-[#59B9C6] text-white"
   : "border-gray-200 bg-white text-[#333333]"
                       }`}
@@ -294,14 +301,13 @@ export default function BookingCalendar({ service, blocks }: Props) {
                         <button
                           key={block.id}
                           type="button"
+                          disabled={isCheckingAvailability}
                           onClick={() => {
                             setSecondBlockId(block.id)
                             setAvailabilityError("")
-                            setAvailabilityInfo(null)
-                            setIsCheckingAvailability(true)
-                            setHasEnoughAvailability(false)
+                            setIsCheckingAvailability(false)
                           }}
-                          className={`rounded-lg border p-3 text-left ${
+                          className={`rounded-2xl border p-4 text-left transition disabled:opacity-50 ${
                             isSelected ? "bg-black text-white" : "bg-white"
                           }`}
                         >
@@ -319,7 +325,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
         <div className="min-w-0 rounded-2xl bg-[#F7F5F2] p-4">
           {!firstDate && (
             <p className="text-sm text-gray-600">
-              Selecciona una fecha para ver los horarios disponibles.
+              Selecciona un día para consultar disponibilidad y horarios.
             </p>
           )}
 
@@ -348,10 +354,25 @@ export default function BookingCalendar({ service, blocks }: Props) {
                       </p>
                     )}
 
-                    <p className="mt-1 text-lg font-semibold text-[#333333]">
-                      {availabilityInfo.remaining} lugar
-                      {availabilityInfo.remaining === 1 ? "" : "es"}
-                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <div
+                        className={`h-2 w-2 rounded-full ${
+                          availabilityInfo.remaining <= 0
+                            ? "bg-red-500"
+                            : availabilityInfo.remaining <= 2
+                              ? "bg-yellow-500"
+                              : "bg-[#59B9C6]"
+                        }`}
+                      />
+
+                      <p className="text-lg font-semibold text-[#333333]">
+                        {availabilityInfo.remaining <= 0
+                          ? "Horario lleno"
+                          : availabilityInfo.remaining <= 2
+                            ? `Últimos ${availabilityInfo.remaining} lugares`
+                            : `${availabilityInfo.remaining} lugares disponibles`}
+                      </p>
+                    </div>
 
                     <p className="mt-1 text-xs text-[#333333]/55">
                       Disponible para ese día y horario.
@@ -423,7 +444,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
                         `/reservar/${service.slug}/datos?date=${firstDate}&blockId=${firstBlockId}${secondParams}`
                       )
                     }}
-                    className="mt-4 w-full rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#4ca9b5] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="mt-4 w-full rounded-2xl bg-[#59B9C6] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#4ca9b5] disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
                   >
                     {isCheckingAvailability ? "Consultando disponibilidad..." : "Continuar"}
                   </button>
