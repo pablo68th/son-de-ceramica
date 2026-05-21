@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { PageTransitionOverlay } from "./PageTransitionOverlay"
 import { createReservation } from "../lib/reservationService"
 
 type Service = {
@@ -47,6 +48,7 @@ export function ReservationForm({
   const [acceptPromos, setAcceptPromos] = useState(false)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
 
@@ -83,6 +85,7 @@ export function ReservationForm({
 
     try {
       setIsSubmitting(true)
+      setIsTransitioning(true)
 
     await createReservation({
       serviceId: service.id,
@@ -101,6 +104,8 @@ setSuccessMessage(
   "Recibimos tu solicitud. Tu lugar se aparta cuando se registre un anticipo mínimo del 50%. El resto se liquida antes de iniciar la sesión."
 )
     } catch (error) {
+      setIsTransitioning(false)
+
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -109,6 +114,12 @@ setSuccessMessage(
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (isTransitioning && !successMessage) {
+    return (
+      <PageTransitionOverlay message="Enviando tu solicitud..." />
+    )
   }
 
   if (successMessage) {
