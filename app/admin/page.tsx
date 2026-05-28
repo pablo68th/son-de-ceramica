@@ -110,6 +110,13 @@ export default async function AdminPage() {
             >
               Bloquear fechas
             </a>
+
+            <a
+              href="/admin/calendario"
+              className="inline-block rounded-2xl bg-[#333333] px-5 py-3 text-sm font-semibold !text-white transition active:scale-[0.98] hover:bg-[#222222]"
+            >
+              Ver calendario
+            </a>
           </div>
         </div>
 

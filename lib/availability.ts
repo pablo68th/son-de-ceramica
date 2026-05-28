@@ -1,13 +1,44 @@
 import { supabase } from "./supabaseClient"
 
+type AvailabilityResult = {
+  available: boolean
+  remaining: number
+  message: string
+  blocked?: boolean
+}
+
+async function isScheduleBlocked(date: string, blockId: string) {
+  const { data, error } = await supabase
+    .from("blocked_schedule_dates")
+    .select("id, block_id")
+    .eq("date", date)
+
+  if (error) {
+    return {
+      blocked: true,
+      message: "Error consultando bloqueos",
+    }
+  }
+
+  const blocked = data?.some((item) => {
+    if (!item.block_id) return true
+    return item.block_id === blockId
+  })
+
+  return {
+    blocked: Boolean(blocked),
+    message: blocked ? "Horario bloqueado por el estudio" : "",
+  }
+}
+
 export async function getAvailability(
   serviceId: string,
   date: string,
   blockId: string
-) {
+): Promise<AvailabilityResult> {
   const { data: service, error: serviceError } = await supabase
     .from("services")
-    .select("*")
+    .select("id, capacity")
     .eq("id", serviceId)
     .single()
 
@@ -19,42 +50,18 @@ export async function getAvailability(
     }
   }
 
-    const { data: blockedDates } = await supabase
-    .from("blocked_schedule_dates")
-    .select("*")
-    .eq("date", date)
+  const blocked = await isScheduleBlocked(date, blockId)
 
-  const isBlocked = blockedDates?.some((blocked) => {
-    if (!blocked.block_id) return true
-
-    return blocked.block_id === blockId
-  })
-
-  if (isBlocked) {
+  if (blocked.blocked) {
     return {
       available: false,
       remaining: 0,
-      message: "Horario no disponible",
+      message: blocked.message,
+      blocked: true,
     }
   }
 
-  const { data: blocked } = await supabase
-    .from("blocked_dates")
-    .select("*")
-    .eq("blocked_date", date)
-
-  const isDayBlocked = blocked?.some((b) => b.block_id === null)
-  const isBlockBlocked = blocked?.some((b) => b.block_id === blockId)
-
-  if (isDayBlocked || isBlockBlocked) {
-    return {
-      available: false,
-      remaining: 0,
-      message: "Fecha o bloque no disponible",
-    }
-  }
-
-    const { data: reservedCount, error: reservedError } = await supabase.rpc(
+  const { data: reservedCount, error: reservedError } = await supabase.rpc(
     "get_reserved_people_count",
     {
       p_service_id: serviceId,
@@ -72,8 +79,8 @@ export async function getAvailability(
   }
 
   const reserved = reservedCount ?? 0
-
   const remaining = Math.max(service.capacity - reserved, 0)
+
   return {
     available: remaining > 0,
     remaining,
@@ -97,7 +104,8 @@ export async function validateFullAvailability({
   for (const date of dates) {
     const availability = await getAvailability(serviceId, date, blockId)
 
-    const hasEnoughSpace = availability.remaining >= peopleCount
+    const hasEnoughSpace =
+      availability.available && availability.remaining >= peopleCount
 
     results.push({
       date,
@@ -107,10 +115,8 @@ export async function validateFullAvailability({
     })
   }
 
-  const allAvailable = results.every((result) => result.available)
-
   return {
-    allAvailable,
+    allAvailable: results.every((result) => result.available),
     results,
   }
 }
@@ -133,7 +139,8 @@ export async function validateSessionPlanAvailability({
       session.blockId
     )
 
-    const hasEnoughSpace = availability.remaining >= peopleCount
+    const hasEnoughSpace =
+      availability.available && availability.remaining >= peopleCount
 
     results.push({
       date: session.date,

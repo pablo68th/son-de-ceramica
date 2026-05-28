@@ -30,6 +30,7 @@ type Block = {
 type AvailabilityInfo = {
   remaining: number
   message: string
+  blocked?: boolean
 }
 
 type Props = {
@@ -91,7 +92,9 @@ function AvailabilityCard({
       <div className="mt-2 flex items-center gap-2">
         <div
           className={`h-2 w-2 rounded-full ${
-            info.remaining <= 0
+            info.blocked
+            ? "bg-gray-400"
+            : info.remaining <= 0
               ? "bg-red-500"
               : info.remaining <= 2
                 ? "bg-yellow-500"
@@ -100,16 +103,20 @@ function AvailabilityCard({
         />
 
         <p className="text-lg font-semibold text-[#333333]">
-          {info.remaining <= 0
-            ? "Horario lleno"
-            : info.remaining <= 2
-              ? `Últimos ${info.remaining} lugares`
-              : `${info.remaining} lugares disponibles`}
+          {info.blocked
+            ? "No disponible"
+            : info.remaining <= 0
+              ? "Horario lleno"
+              : info.remaining <= 2
+                ? `Últimos ${info.remaining} lugares`
+                : `${info.remaining} lugares disponibles`}
         </p>
       </div>
 
       <p className="mt-1 text-xs text-[#333333]/55">
-        Disponible para ese día y horario.
+        {info.blocked
+          ? "Bloqueado por el estudio."
+          : "Disponible para ese día y horario."}
       </p>
     </div>
   )
@@ -242,6 +249,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
       setFirstAvailabilityInfo({
         remaining: availability.remaining,
         message: availability.message,
+        blocked: availability.blocked,
       })
     } catch {
       setAvailabilityError("No se pudo consultar la disponibilidad.")
@@ -266,6 +274,7 @@ export default function BookingCalendar({ service, blocks }: Props) {
       setSecondAvailabilityInfo({
         remaining: availability.remaining,
         message: availability.message,
+        blocked: availability.blocked,
       })
     } catch {
       setAvailabilityError("No se pudo consultar la disponibilidad.")

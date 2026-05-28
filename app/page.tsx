@@ -3,6 +3,7 @@ import Link from "next/link"
 const experiences = [
   {
     title: "Tus primeras vueltas",
+    slug: "clases-de-torno-4",
     subtitle: "Clases de torno · 4 sesiones",
     description: "Aprende torno desde cero mientras desarrollas tus primeras piezas paso a paso.",
     badge: "Más elegida",
@@ -10,6 +11,7 @@ const experiences = [
   },
   {
     title: "Manos a tu obra",
+    slug: "construccion-manual-4",
     subtitle: "Construcción manual · 4 sesiones",
     description: "Crea piezas a mano y experimenta con formas, texturas y técnicas manuales.",
     badge: "Todos niveles",
@@ -17,6 +19,7 @@ const experiences = [
   },
   {
     title: "Pequeños ceramistas",
+    slug: "ceramica-para-ninos",
     subtitle: "Cerámica para niñ@s",
     description: "Un espacio creativo para explorar el barro, la imaginación y el trabajo con las manos.",
     badge: "Para niñ@s",
@@ -24,10 +27,11 @@ const experiences = [
   },
   {
     title: "Piezas de sábado por la mañana",
+    slug: "sesiones-sabatinas",
     subtitle: "Sesiones sabatinas",
     description: "Una experiencia tranquila de fin de semana para crear, aprender y bajar el ritmo.",
     badge: "Fin de semana",
-    meta: ["1 sesión", "Manual", "Cupo 8"],
+    meta: ["1 sesión", "Torno", "Cupo 8"],
   },
 ]
 
@@ -180,7 +184,7 @@ export default function HomePage() {
                 </div>
 
                 <Link
-                  href="/reservar"
+                  href={`/reservar/${experience.slug}`}
                   className="mt-3 block rounded-2xl bg-[#333333] px-5 py-4 text-center text-sm font-semibold !text-white transition hover:bg-[#222222] active:scale-[0.98]"
                 >
                   Ver horarios

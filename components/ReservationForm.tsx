@@ -100,8 +100,25 @@ export function ReservationForm({
       email: email.trim().toLowerCase(),
     })
 
+    await fetch("/api/notify-admin", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    name: name.trim(),
+    lastName: lastName.trim(),
+    phone: cleanPhone,
+    email: email.trim().toLowerCase(),
+    serviceName: service.name,
+    peopleCount,
+    date,
+    secondDate,
+  }),
+})
+
 setSuccessMessage(
-  "Recibimos tu solicitud. Tu lugar se aparta cuando se registre un anticipo mínimo del 50%. El resto se liquida antes de iniciar la sesión."
+  "Recibimos tu solicitud. Tu lugar se confirma una vez validado el anticipo correspondiente."
 )
     } catch (error) {
       setIsTransitioning(false)
@@ -134,15 +151,19 @@ setSuccessMessage(
         </p>
 
         <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">
-          Pre-reserva enviada
+          Solicitud recibida
         </h2>
 
         <p className="mt-4 text-sm leading-7 text-[#333333]/65">
           {successMessage}
         </p>
 
-        <p className="mt-2 text-sm leading-7 text-[#333333]/65">
-          Te esperamos en Son de Cerámica Studio.
+        <p className="mt-3 text-sm leading-7 text-[#333333]/65">
+          Nuestro equipo se pondrá en contacto contigo por WhatsApp para continuar con tu reservación.
+        </p>
+
+        <p className="mt-3 text-sm leading-7 text-[#333333]/65">
+          ¡Gracias por elegir Son de Cerámica Studio!
         </p>
 
         <a
@@ -313,7 +334,16 @@ setSuccessMessage(
         />
 
         <span>
-          Acepto el aviso de privacidad y el uso de mis datos para gestionar mi solicitud de reservación.
+          Acepto el{" "}
+          <a
+            href="/privacidad"
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full bg-[#59B9C6]/15 px-2 py-1 font-semibold text-[#2f8f9a] underline decoration-[#59B9C6]/40 underline-offset-4"
+          >
+            aviso de privacidad
+          </a>{" "}
+          y el uso de mis datos para gestionar mi solicitud de reservación.
         </span>
       </label>
 

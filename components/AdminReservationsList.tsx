@@ -266,6 +266,7 @@ export function AdminReservationsList({ sessions }: Props) {
                   <PaymentToggle
                     reservationId={reservation.id}
                     initialStatus={reservation.payment_status ?? "pending"}
+                    sessions={item.sessions}
                   />
 
                   <CancelReservationButton
